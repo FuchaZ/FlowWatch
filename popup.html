@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowWatch</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="header-title">
+        <img src="icon16.png" class="app-logo" alt="logo">
+        <h1>FlowWatch 流量监控</h1>
+        <button id="themeToggle" class="theme-toggle" title="主题：跟随系统（点击切换）">🌙</button>
+      </div>
+      <div class="period-tabs">
+        <button class="period-btn active" data-period="today">今日</button>
+        <button class="period-btn" data-period="month">本月</button>
+      </div>
+    </div>
+    <div class="total-section">
+      <div class="total-label">总流量</div>
+      <div class="total-value" id="totalValue">-</div>
+      <div class="total-breakdown" id="totalBreakdown"></div>
+    </div>
+    <div class="domain-list" id="domainList">
+      <div class="loading">加载中...</div>
+    </div>
+    <div class="footer">
+      <button id="openDashboard" class="dashboard-btn">查看详细统计 →</button>
+    </div>
+  </div>
+  <script src="shared.js"></script>
+  <script src="dataService.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

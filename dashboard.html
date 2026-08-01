@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowWatch - 详细统计</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-left">
+        <img src="icon32.png" class="app-logo" alt="logo">
+        <div class="header-titles">
+          <h1>FlowWatch 流量监控</h1>
+          <span class="subtitle">详细统计</span>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button id="themeToggle" class="theme-toggle" title="主题：跟随系统（点击切换）">🌙</button>
+        <select id="yearSelect"></select>
+        <select id="monthSelect"></select>
+        <div id="dayPicker" class="day-picker" style="display:none">
+          <button id="dayPickerBtn" class="day-picker-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>全部</span></button>
+          <div id="dayPickerPanel" class="day-picker-panel">
+            <div class="dp-header">
+              <button id="dpPrev" class="dp-nav">◀</button>
+              <span id="dpTitle" class="dp-title"></span>
+              <button id="dpNext" class="dp-nav">▶</button>
+            </div>
+            <div class="dp-weekdays">
+              <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div id="dpGrid" class="dp-grid"></div>
+            <button id="dpClear" class="dp-clear-btn">显示全部</button>
+          </div>
+        </div>
+        <div class="view-toggle-group">
+          <button id="viewRecent7Btn" class="view-toggle">近7天</button>
+          <button id="viewRecent30Btn" class="view-toggle">近30天</button>
+          <button id="viewMonthBtn" class="view-toggle active">月度</button>
+          <button id="viewYearBtn" class="view-toggle">年度</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-icon card-icon-total"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">总流量</div>
+          <div class="card-value" id="totalTraffic">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-browse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">浏览流量</div>
+          <div class="card-value card-value-browse" id="browseTraffic">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">下载流量</div>
+          <div class="card-value card-value-dl" id="downloadTraffic">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">追踪天数</div>
+          <div class="card-value" id="activeDays">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-avg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">日均流量</div>
+          <div class="card-value" id="avgDaily">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon card-icon-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></div>
+        <div class="card-body">
+          <div class="card-label">最多流量日</div>
+          <div class="card-value" id="peakDay">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="section">
+        <div class="section-header">
+          <h2>每日趋势</h2>
+          <div class="section-controls">
+            <span class="chart-legend">
+              <span class="legend-item"><i class="legend-dot legend-browse"></i>浏览</span>
+              <span class="legend-item"><i class="legend-dot legend-download"></i>下载</span>
+            </span>
+            <button id="chartViewBar" class="chart-view-btn active">柱状图</button>
+            <button id="chartViewLine" class="chart-view-btn">折线图</button>
+          </div>
+        </div>
+        <div class="chart-container">
+          <svg id="trendChart" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2 id="domainListTitle">域名排行</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="type-filter">
+              <button id="typeAllBtn" class="type-filter-btn active">全部</button>
+              <button id="typeBrowseBtn" class="type-filter-btn">仅浏览</button>
+              <button id="typeDownloadBtn" class="type-filter-btn">仅下载</button>
+            </div>
+            <button id="toggleExcludedBtn" class="chart-view-btn" style="display:none">显示已排除</button>
+            <button id="manageExclusionsBtn" class="chart-view-btn">管理排除</button>
+            <div class="search-box">
+              <input type="text" id="domainSearch" placeholder="搜索域名...">
+            </div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <svg id="domainDonut" viewBox="0 0 200 200" class="donut-svg"></svg>
+          <div id="donutLegend" class="donut-legend"></div>
+        </div>
+        <div class="table-container">
+          <table id="domainTable">
+            <thead>
+              <tr>
+                <th class="col-rank">#</th>
+                <th class="col-type">类型</th>
+                <th class="col-domain">域名</th>
+                <th class="col-bytes">流量</th>
+                <th class="col-breakdown">明细</th>
+                <th class="col-action">操作</th>
+              </tr>
+            </thead>
+            <tbody id="domainBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section" id="excludedSection" style="display:none">
+        <div class="section-header">
+          <h2>已排除的域名</h2>
+          <button id="closeExcludedBtn" class="close-btn">✕</button>
+        </div>
+        <div id="excludedList" style="font-size:13px;color:var(--text-weak)">加载中...</div>
+      </div>
+
+      <div class="section" id="domainDetailSection" style="display:none">
+        <div class="section-header">
+          <h2 id="detailDomainName">域名详情</h2>
+          <button id="closeDetail" class="close-btn">✕</button>
+        </div>
+        <div class="detail-info">
+          <div class="detail-stat">
+            <span class="detail-label">本月流量</span>
+            <span class="detail-value" id="detailTotal">-</span>
+          </div>
+          <div class="detail-stat">
+            <span class="detail-label">流量构成</span>
+            <span class="detail-value" id="detailBreakdown" style="font-size:14px">-</span>
+          </div>
+          <div class="detail-stat">
+            <span class="detail-label">日均</span>
+            <span class="detail-value" id="detailAvg">-</span>
+          </div>
+          <div class="detail-stat">
+            <span class="detail-label">峰值日</span>
+            <span class="detail-value" id="detailPeak">-</span>
+          </div>
+        </div>
+        <div id="subdomainBreakdown" style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px">细分域名</div>
+          <div id="subdomainList"></div>
+        </div>
+        <div class="chart-container" style="height:200px">
+          <svg id="detailChart" viewBox="0 0 900 200" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+
+      <div class="section" style="display:flex;gap:12px;justify-content:space-between;align-items:center;box-shadow:none;background:transparent;padding:0">
+        <div id="storageBar" style="font-size:12px;color:var(--text-secondary)">
+          <div style="margin-bottom:4px">存储空间: <span id="storageUsed">-</span></div>
+          <div style="width:160px;height:6px;background:var(--bar-bg);border-radius:3px;overflow:hidden">
+            <div id="storageFill" style="height:100%;width:0%;background:var(--accent);border-radius:3px;transition:width 0.3s"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <button id="exportCsvBtn" class="action-btn" style="padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);cursor:pointer;font-size:13px;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出 CSV</button>
+          <button id="resetDataBtn" class="action-btn" style="padding:8px 16px;border:1px solid var(--red);border-radius:6px;background:var(--card-bg);cursor:pointer;font-size:13px;color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>重置所有数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="shared.js"></script>
+  <script src="dataService.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+/* ── 主题变量 ─────────────────────────────────────────────── */
+:root {
+  --bg-top: #fafaf9;
+  --bg-bottom: #f5f5f4;
+  --text-primary: #18181b;
+  --text-body: #3f3f46;
+  --text-weak: #71717a;
+  --text-secondary: #a1a1aa;
+  --border: #e4e4e7;
+  --border-light: #e4e4e7;
+  --card-bg: #fff;
+  --card-hover-bg: #f4f4f5;
+  --accent: #1f2937;
+  --accent-light: #4b5563;
+  --bar-bg: #e4e4e7;
+  --red: #ef4444;
+  --red-soft: #fee2e2;
+  --on-accent: #fff;
+  --card-shadow-item: 0 2px 8px rgba(24,24,27,0.06);
+  --main-grad: linear-gradient(135deg, #1f2937, #111827);
+  --focus-ring: rgba(31,41,55,0.15);
+}
+
+:root[data-theme="dark"] {
+  --bg-top: #0c0c0d;
+  --bg-bottom: #101012;
+  --text-primary: #fafafa;
+  --text-body: #d4d4d8;
+  --text-weak: #a1a1aa;
+  --text-secondary: #71717a;
+  --border: #27272a;
+  --border-light: #1f1f22;
+  --card-bg: #18181b;
+  --card-hover-bg: #1f1f22;
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --bar-bg: #27272a;
+  --red: #f87171;
+  --red-soft: #2a1414;
+  --on-accent: #18181b;
+  --card-shadow-item: 0 2px 8px rgba(0,0,0,0.5);
+  --main-grad: linear-gradient(135deg, #1f2937, #18181b);
+  --focus-ring: rgba(245, 158, 11, 0.25);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  background-attachment: fixed;
+  color: var(--text-body);
+}
+
+#app {
+  padding: 16px;
+}
+
+.header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.period-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.period-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-weak);
+  transition: all 0.2s;
+}
+
+.period-btn:hover {
+  background: var(--card-hover-bg);
+}
+
+.period-btn.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.total-section {
+  background: var(--main-grad);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.total-label {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.total-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.total-breakdown {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 6px;
+  display: flex;
+  gap: 12px;
+}
+
+.domain-list {
+  margin-bottom: 12px;
+}
+
+.domain-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: background 0.15s, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.domain-item:hover {
+  background: var(--card-hover-bg);
+  transform: translateY(-1px);
+  box-shadow: var(--card-shadow-item);
+}
+
+.domain-item:hover .domain-exclude-btn {
+  opacity: 1;
+}
+
+.domain-exclude-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--text-faint, #ccc);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  margin-left: 4px;
+  transition: all 0.15s;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.domain-exclude-btn:hover {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.domain-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.domain-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.domain-bytes {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.bar-bg {
+  height: 3px;
+  background: var(--bar-bg);
+  border-radius: 2px;
+  margin-top: 6px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px;
+  font-size: 13px;
+}
+
+.footer {
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+}
+
+.dashboard-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.dashboard-btn:hover {
+  background: var(--card-hover-bg);
+  border-color: var(--accent);
+}
+
+/* ── 动画与微交互 ──────────────────────────────────────────── */
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.header-title h1 {
+  margin-bottom: 0;
+}
+
+.app-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.theme-toggle {
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.theme-toggle:hover {
+  background: var(--card-hover-bg);
+  border-color: var(--accent);
+}
+
+/* 总流量卡片装饰光晕 */
+.total-section {
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.35s ease both;
+}
+
+.total-section::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
+  pointer-events: none;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 域名列表项交错入场（JS 添加 .enter + animation-delay） */
+.domain-item.enter {
+  animation: fadeInUp 0.3s ease both;
+}
+
+.period-btn:active,
+.dashboard-btn:active {
+  transform: scale(0.97);
+}
+
+/* 尊重系统"减少动态效果"设置 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
