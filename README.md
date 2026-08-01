@@ -50,7 +50,13 @@ GitHub Actions 会在 push/PR 时自动执行以上检查。
 
 ### 截图
 
-> 待添加 — 欢迎 PR 贡献截图！
+浅色模式：
+
+![FlowWatch 浅色模式](docs/screenshots/light.png)
+
+暗色模式：
+
+![FlowWatch 暗色模式](docs/screenshots/dark.png)
 
 ---
 
@@ -97,4 +103,11 @@ All data lives in `chrome.storage.local`. Nothing is ever uploaded. The extensio
 
 ### Screenshots
 
-> TODO — PRs welcome!
+Light mode:
+
+![FlowWatch light mode](docs/screenshots/light.png)
+
+Dark mode:
+
+![FlowWatch dark mode](docs/screenshots/dark.png)
+
