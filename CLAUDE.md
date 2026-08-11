@@ -51,7 +51,7 @@ pending_downloads_raw → [ ... ]                    未 flush 的下载明细
 - **下载采集**：`chrome.downloads.onChanged` 检测 `state:'complete'`，用 `chrome.downloads.search({id})` 补全 `fileSize` 和 URL。
 - **排除机制**：`background.js` 维护内存 `excludedDomains` Set，`chrome.storage.onChanged` 同步。Popup/Dashboard 通过 dataService 读写。
 - **Favicon**：`createFavicon(domain)` 三级解析 —— ① 直连 `/favicon.ico`（原域 → 根域 → CDN 映射主站）；② 抓主站主页 HTML 前 64KB 解析 `<link rel=icon>`；③ `favicon.im` 兜底（Cloudflare，国内可达，带熔断）。**CDN 映射表 `CDN_OWNER_MAP`**（shared.js）：hdslb.com / bilivideo.* / githubassets.com / aliyuncs.com 等 ~35 个平台 CDN 域名映射到主站取图标。带会话级缓存（`faviconCache` Map，Promise 去重）+ 并发信号量（≤6）。全部失败 → 灰色 SVG base64 占位。**新遇到没图标的 CDN 域名：在 `CDN_OWNER_MAP` 补一条即可覆盖整类。**
-- **SVG 图表**：`drawChart()` / `drawDetailChart()` 生成 `<rect>`/`<polyline>`/`<circle>` SVG，使用 `viewBox` 自适应缩放，`Date.now()` 后缀防 gradiant id 冲突。趋势图柱/点带 `data-day` 属性 + `<title>` 原生 tooltip，点击可跳转到对应日期的统计数据（自动切回月度视图并选中该日）。主图柱状图支持**浏览/下载堆叠**（`opts.stackValues`），折线模式带渐变面积填充，峰值日金色高亮。**配色系统**：石墨黑金（浅色暖灰白底 #fafaf9 + 石墨黑主色 #1f2937 + 金色下载 #d97706；暗色近黑底 #0c0c0d + 金色激活 #f59e0b；浏览=石墨/亮灰、下载=金），全部 CSS 变量控制（dashboard.css / popup.css `:root` + `[data-theme=dark]`），图表颜色由 CSS 变量接管。域名占比环形图 `drawDonut()`（Top 7 + 其他，点击扇区/图例联动表格）。
+- **SVG 图表**：`drawChart()` / `drawDetailChart()` 生成 `<rect>`/`<polyline>`/`<circle>` SVG，使用 `viewBox` 自适应缩放，`Date.now()` 后缀防 gradiant id 冲突。趋势图柱/点带 `data-day` 属性 + `<title>` 原生 tooltip，点击可跳转到对应日期的统计数据（自动切回月度视图并选中该日）。主图柱状图支持**浏览/下载堆叠**（`opts.stackValues`），折线模式带渐变面积填充，峰值日金色高亮。**配色系统**：石墨黑金（浅色暖灰白底 #fafaf9 + 石墨黑主色 #1f2937 + 金色下载 #d97706；暗色近黑底 #0c0c0d + 金色激活 #f59e0b；浏览=石墨/亮灰、下载=金），全部 CSS 变量控制（dashboard.css / popup.css `:root` + `[data-theme=dark]`），图表颜色由 CSS 变量接管。域名占比环形图 `drawDonut()`（Top 5 + 其他，点击扇区/图例联动表格）。
 - **自动剪枝**：存储占用 >80% 时删除最旧 30 天数据。
 - **年份选择**：支持去年 + 今年（跨年日历翻月可同步）。
 
@@ -83,4 +83,5 @@ Popup 或 Dashboard 打开
 - SVG 图表是每日批量渲染，非实时更新
 - 下载文件本身的 URL 可能为空（如 `blob:` URL），此时跳过
 - 域名归一化是本地启发式规则，不依赖公共后缀列表
+
 

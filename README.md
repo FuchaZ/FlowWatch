@@ -13,7 +13,7 @@
 
 - 📊 **流量统计** — 按域名统计浏览和下载流量，实时采集
 - 📅 **日/月/年视图** — 摘要卡片 + 每日趋势 + 域名排行，日历选择器按日查看
-- 📈 **SVG 图表** — 柱状图/折线图切换，**点击柱/点直接跳转到该日统计**（hover 有原生 tooltip）
+- 📈 **SVG 图表** — 浏览/下载堆叠柱状图 + 总流量趋势折线融合（折点对齐柱顶），**点击柱/点直接跳转到该日统计**（hover 有原生 tooltip）
 - 🔍 **域名详情** — 点击任意域名查看细分域名拆分和每日明细
 - 🚫 **域名排除** — 一键排除不关心的域名（如 CDN）
 - 📥 **CSV 导出** — 导出当前视图的域名流量报表
@@ -66,7 +66,7 @@ GitHub Actions 会在 push/PR 时自动执行以上检查。
 
 - 📊 **Traffic tracking** — Browse/download bytes per domain, collected in real time
 - 📅 **Day/Month/Year views** — Summary cards, daily trends, domain rankings, calendar day picker
-- 📈 **SVG charts** — Bar/line toggle; **click a bar/dot to jump to that day's stats** (native tooltip on hover)
+- 📈 **SVG charts** — Stacked browse/download bars fused with a total-traffic trend line; **click a bar/dot to jump to that day's stats** (native tooltip on hover)
 - 🔍 **Domain details** — Subdomain breakdown and daily history for any domain
 - 🚫 **Domain exclusion** — One-click exclude domains you don't care about (e.g., CDNs)
 - 📥 **CSV export** — Export current view as CSV
@@ -110,4 +110,5 @@ Light mode:
 Dark mode:
 
 ![FlowWatch dark mode](docs/screenshots/dark.png)
+
 
