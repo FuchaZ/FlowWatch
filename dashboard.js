@@ -199,22 +199,25 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     });
   }
 
-  // 下载占比融合折线（与柱共享 X 轴，右轴 0-100%，Reasonix 风格双轴图）
+  // 下载占比融合折线（与柱共享 X 轴，右轴自适应 0~oMax%，Reasonix 风格双轴图）
   if (hasOverlay) {
+    const maxOverlay = Math.max(...overlayValues, 1);
+    const oStep = maxOverlay > 80 ? 25 : (maxOverlay > 30 ? 10 : 5);
+    const oMax = Math.max(Math.ceil(maxOverlay / oStep) * oStep, oStep * 4);
     for (let i = 0; i <= 4; i++) {
-      const pct = i * 25;
-      const y = pad.top + chartH - (chartH * pct / 100);
+      const pct = (oMax / 4) * i;
+      const y = pad.top + chartH - (pct / oMax) * chartH;
       svgContent += `<text class="axis-label" x="${W - 4}" y="${y}" font-size="${fontSize}" text-anchor="end" dominant-baseline="middle">${pct}%</text>`;
     }
     const linePts = overlayValues.map((v, i) => {
       const x = pad.left + (chartW / barCount) * i + (chartW / barCount) / 2;
-      const y = pad.top + chartH - (v / 100) * chartH;
+      const y = pad.top + chartH - (v / oMax) * chartH;
       return { x, y };
     });
     svgContent += `<polyline class="overlay-line" points="${linePts.map(p => `${p.x},${p.y}`).join(' ')}"/>`;
     linePts.forEach((p, i) => {
       if (overlayValues[i] <= 0) return;
-      svgContent += `<circle class="overlay-dot" data-day="${allDates[i]}" cx="${p.x}" cy="${p.y}" r="2.5"><title>${formatDateLabel(allDates[i])}: 下载占比 ${overlayValues[i].toFixed(1)}%</title></circle>`;
+      svgContent += `<circle class="overlay-dot" data-day="${allDates[i]}" cx="${p.x}" cy="${p.y}" r="3"><title>${formatDateLabel(allDates[i])}: 下载占比 ${overlayValues[i].toFixed(1)}%</title></circle>`;
     });
   }
 
@@ -1081,6 +1084,7 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+
 
 
 

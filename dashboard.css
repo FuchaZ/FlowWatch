@@ -1076,7 +1076,7 @@ body {
 /* 下载占比融合折线（Reasonix 风格双轴图） */
 .chart-container svg .overlay-line {
   stroke: var(--download-color);
-  stroke-width: 2;
+  stroke-width: 2.5;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -1091,3 +1091,4 @@ body {
 .legend-overlay {
   background: var(--download-color);
 }
+
