@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FlowWatch 流量监控",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "按域名统计浏览/下载流量，支持按日/月/年查看趋势与域名排行。所有数据仅存本地，绝不上传。",
   "permissions": [
     "webRequest",
@@ -33,4 +33,5 @@
     "128": "icon128.png"
   }
 }
+
 
