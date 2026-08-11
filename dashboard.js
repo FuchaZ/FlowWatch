@@ -110,7 +110,7 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
   } = opts;
   const W = 900;
   const hasOverlay = !!(overlayValues && overlayValues.length);
-  if (hasOverlay) pad = { ...pad, right: 52 };
+  if (hasOverlay) pad.right = 52; // pad 是解构 const，改属性而非重新赋值
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
 
@@ -1081,5 +1081,6 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+
 
 
