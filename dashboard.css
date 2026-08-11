@@ -1072,3 +1072,22 @@ body {
   transform: scale(1.12);
   z-index: 1;
 }
+
+/* 下载占比融合折线（Reasonix 风格双轴图） */
+.chart-container svg .overlay-line {
+  stroke: var(--download-color);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart-container svg .overlay-dot {
+  fill: var(--download-color);
+  transition: r 0.12s ease;
+}
+.chart-container svg .overlay-dot:hover {
+  r: 4;
+}
+.legend-overlay {
+  background: var(--download-color);
+}

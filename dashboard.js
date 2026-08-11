@@ -62,21 +62,21 @@ function applyChartAnimations(svg) {
     el.style.opacity = '0';
     el.style.transitionDelay = `${Math.min(i * 4, 320)}ms`;
   });
-  const line = svg.querySelector('.line-anim');
-  if (line) {
+  const lines = svg.querySelectorAll('.line-anim, .overlay-line');
+  lines.forEach(line => {
     const len = line.getTotalLength();
     line.style.strokeDasharray = len;
     line.style.strokeDashoffset = len;
-  }
+  });
   // 下一帧统一播放，确保初始状态先被应用
   requestAnimationFrame(() => {
     if (area) area.style.opacity = '';
     bars.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
     dots.forEach(el => { el.style.opacity = '1'; });
-    if (line) {
+    lines.forEach(line => {
       line.style.transition = 'stroke-dashoffset 0.6s ease';
       line.style.strokeDashoffset = '0';
-    }
+    });
   });
 }
 
@@ -105,9 +105,12 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     barWidthMax = 20,
     interactive = true,
     fontSize = 11,
-    stackValues = null
+    stackValues = null,
+    overlayValues = null
   } = opts;
   const W = 900;
+  const hasOverlay = !!(overlayValues && overlayValues.length);
+  if (hasOverlay) pad = { ...pad, right: 52 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
 
@@ -193,6 +196,25 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
       const r = isSel ? 5 : (isPeak ? 6 : 3);
       const cls = `${isSel ? 'dot-anim selected-day' : 'dot-anim'}${isPeak ? ' peak-day' : ''}`;
       svgContent += `<circle class="${cls}" data-day="${day}" cx="${p.x}" cy="${p.y}" r="${r}"><title>${formatDateLabel(day)}: ${formatBytes(values[i])}</title></circle>`;
+    });
+  }
+
+  // 下载占比融合折线（与柱共享 X 轴，右轴 0-100%，Reasonix 风格双轴图）
+  if (hasOverlay) {
+    for (let i = 0; i <= 4; i++) {
+      const pct = i * 25;
+      const y = pad.top + chartH - (chartH * pct / 100);
+      svgContent += `<text class="axis-label" x="${W - 4}" y="${y}" font-size="${fontSize}" text-anchor="end" dominant-baseline="middle">${pct}%</text>`;
+    }
+    const linePts = overlayValues.map((v, i) => {
+      const x = pad.left + (chartW / barCount) * i + (chartW / barCount) / 2;
+      const y = pad.top + chartH - (v / 100) * chartH;
+      return { x, y };
+    });
+    svgContent += `<polyline class="overlay-line" points="${linePts.map(p => `${p.x},${p.y}`).join(' ')}"/>`;
+    linePts.forEach((p, i) => {
+      if (overlayValues[i] <= 0) return;
+      svgContent += `<circle class="overlay-dot" data-day="${allDates[i]}" cx="${p.x}" cy="${p.y}" r="2.5"><title>${formatDateLabel(allDates[i])}: 下载占比 ${overlayValues[i].toFixed(1)}%</title></circle>`;
     });
   }
 
@@ -542,8 +564,14 @@ function updateTrendChart() {
     const data = state.downloadDailyData[d];
     return data ? Object.values(data).reduce((a, b) => a + b, 0) : 0;
   });
+  // 下载占比曲线（0-100%，与柱融合成双轴图，Reasonix 风格）
+  const overlayValues = allDates.map((d, i) => {
+    const tot = (browseValues[i] || 0) + (downloadValues[i] || 0);
+    return tot > 0 ? (downloadValues[i] / tot) * 100 : 0;
+  });
   drawChart(svg, values, allDates, state.chartMode, {
-    stackValues: { browse: browseValues, download: downloadValues }
+    stackValues: { browse: browseValues, download: downloadValues },
+    ...(state.chartMode === 'bar' ? { overlayValues } : {})
   });
 }
 
@@ -1053,4 +1081,5 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+
 
