@@ -110,7 +110,7 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
   } = opts;
   const W = 900;
   const hasOverlay = !!(overlayValues && overlayValues.length);
-  if (hasOverlay) pad.right = 52; // pad 是解构 const，改属性而非重新赋值
+  // 折线与柱共用左轴，无需右轴空间
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
 
@@ -199,25 +199,17 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     });
   }
 
-  // 下载占比融合折线（与柱共享 X 轴，右轴自适应 0~oMax%，Reasonix 风格双轴图）
+  // 总流量趋势折线：折点对齐每根柱子的顶端（与柱共用左轴 niceMax 归一化）
   if (hasOverlay) {
-    const maxOverlay = Math.max(...overlayValues, 1);
-    const oStep = maxOverlay > 80 ? 25 : (maxOverlay > 30 ? 10 : 5);
-    const oMax = Math.max(Math.ceil(maxOverlay / oStep) * oStep, oStep * 4);
-    for (let i = 0; i <= 4; i++) {
-      const pct = (oMax / 4) * i;
-      const y = pad.top + chartH - (pct / oMax) * chartH;
-      svgContent += `<text class="axis-label" x="${W - 4}" y="${y}" font-size="${fontSize}" text-anchor="end" dominant-baseline="middle">${pct}%</text>`;
-    }
     const linePts = overlayValues.map((v, i) => {
       const x = pad.left + (chartW / barCount) * i + (chartW / barCount) / 2;
-      const y = pad.top + chartH - (v / oMax) * chartH;
+      const y = pad.top + chartH - (v / niceMax) * chartH;
       return { x, y };
     });
     svgContent += `<polyline class="overlay-line" points="${linePts.map(p => `${p.x},${p.y}`).join(' ')}"/>`;
     linePts.forEach((p, i) => {
       if (overlayValues[i] <= 0) return;
-      svgContent += `<circle class="overlay-dot" data-day="${allDates[i]}" cx="${p.x}" cy="${p.y}" r="3"><title>${formatDateLabel(allDates[i])}: 下载占比 ${overlayValues[i].toFixed(1)}%</title></circle>`;
+      svgContent += `<circle class="overlay-dot" data-day="${allDates[i]}" cx="${p.x}" cy="${p.y}" r="3"><title>${formatDateLabel(allDates[i])}: ${formatBytes(overlayValues[i])}</title></circle>`;
     });
   }
 
@@ -567,11 +559,8 @@ function updateTrendChart() {
     const data = state.downloadDailyData[d];
     return data ? Object.values(data).reduce((a, b) => a + b, 0) : 0;
   });
-  // 下载占比曲线（0-100%，与柱融合成双轴图，Reasonix 风格）
-  const overlayValues = allDates.map((d, i) => {
-    const tot = (browseValues[i] || 0) + (downloadValues[i] || 0);
-    return tot > 0 ? (downloadValues[i] / tot) * 100 : 0;
-  });
+  // 总流量趋势折线：折点对齐每根柱子的顶端
+  const overlayValues = values;
   drawChart(svg, values, allDates, state.chartMode, {
     stackValues: { browse: browseValues, download: downloadValues },
     ...(state.chartMode === 'bar' ? { overlayValues } : {})
@@ -1084,6 +1073,7 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+
 
 
 
