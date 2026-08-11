@@ -5,7 +5,6 @@ let state = {
   year: new Date().getFullYear(),
   month: new Date().getMonth() + 1,
   viewMode: 'month',
-  chartMode: 'bar',
   chartDates: null, // 当前视图的日期数组（近7/30天视图用）
   trackedDays: 0,   // 追踪总天数（从开始统计至今）
   selectedDay: null,
@@ -172,30 +171,6 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
         const title = interactive ? `<title>${formatDateLabel(day)}: ${formatBytes(val)}</title>` : '';
         svgContent += `<rect class="bar-anim${selCls}${peakCls}"${dayAttr} x="${x}" y="${y}" width="${barWidth}" height="${barH}" fill="url(#${gradId})" rx="2" ry="2">${title}</rect>`;
       }
-    });
-  } else {
-    // 折线图（仅主图使用）
-    const points = values.map((val, i) => {
-      const x = pad.left + (chartW / (barCount - 1 || 1)) * i;
-      const y = pad.top + chartH - (val / niceMax) * chartH;
-      return { x, y, val };
-    });
-    // 渐变面积填充（借鉴 GlassWire 波形设计，直观展示流量起伏）
-    if (points.length > 1) {
-      const bottomY = pad.top + chartH;
-      const lineD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-      const areaD = `${lineD} L${points[points.length - 1].x},${bottomY} L${points[0].x},${bottomY} Z`;
-      svgContent += `<path class="area-anim" d="${areaD}" fill="url(#${gradId})"/>`;
-    }
-    svgContent += `<polyline class="line-anim" points="${points.map(p => `${p.x},${p.y}`).join(' ')}" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-    points.forEach((p, i) => {
-      if (values[i] === 0) return;
-      const day = allDates[i];
-      const isSel = day === state.selectedDay;
-      const isPeak = i === peakIndex;
-      const r = isSel ? 5 : (isPeak ? 6 : 3);
-      const cls = `${isSel ? 'dot-anim selected-day' : 'dot-anim'}${isPeak ? ' peak-day' : ''}`;
-      svgContent += `<circle class="${cls}" data-day="${day}" cx="${p.x}" cy="${p.y}" r="${r}"><title>${formatDateLabel(day)}: ${formatBytes(values[i])}</title></circle>`;
     });
   }
 
@@ -561,9 +536,9 @@ function updateTrendChart() {
   });
   // 总流量趋势折线：折点对齐每根柱子的顶端
   const overlayValues = values;
-  drawChart(svg, values, allDates, state.chartMode, {
+  drawChart(svg, values, allDates, 'bar', {
     stackValues: { browse: browseValues, download: downloadValues },
-    ...(state.chartMode === 'bar' ? { overlayValues } : {})
+    overlayValues
   });
 }
 
@@ -944,27 +919,6 @@ document.addEventListener('DOMContentLoaded', () => {
     refresh();
   });
 
-  document.getElementById('chartViewBar').addEventListener('click', () => {
-    state.chartMode = 'bar';
-    document.getElementById('chartViewBar').classList.add('active');
-    document.getElementById('chartViewLine').classList.remove('active');
-    updateTrendChart();
-    if (state.selectedDomain) {
-      const svg = document.getElementById('detailChart');
-      drawChart(svg, getDomainDailyValues(state.selectedDomain), state.chartDates, 'bar', DETAIL_CHART_OPTS);
-    }
-  });
-
-  document.getElementById('chartViewLine').addEventListener('click', () => {
-    state.chartMode = 'line';
-    document.getElementById('chartViewLine').classList.add('active');
-    document.getElementById('chartViewBar').classList.remove('active');
-    updateTrendChart();
-    if (state.selectedDomain) {
-      const svg = document.getElementById('detailChart');
-      drawChart(svg, getDomainDailyValues(state.selectedDomain), state.chartDates, 'bar', DETAIL_CHART_OPTS);
-    }
-  });
 
   document.getElementById('closeDetail').addEventListener('click', () => {
     state.selectedDomain = null;
@@ -1073,6 +1027,8 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+
+
 
 
 

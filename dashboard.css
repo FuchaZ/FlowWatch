@@ -1092,3 +1092,20 @@ body {
   background: var(--download-color);
 }
 
+
+/* 折线改用 Primer 蓝（与柱顶金色区分，Reasonix 折线用蓝色系一致） */
+:root {
+  --trend-line: #1f6feb;
+}
+:root[data-theme="dark"] {
+  --trend-line: #58a6ff;
+}
+.chart-container svg .overlay-line {
+  stroke: var(--trend-line);
+}
+.chart-container svg .overlay-dot {
+  fill: var(--trend-line);
+}
+.legend-overlay {
+  background: var(--trend-line);
+}
