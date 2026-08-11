@@ -197,7 +197,7 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
   }
 
   // X 轴日期标签（按密度抽样；近7/30天视图跨月时用 M/D 格式）
-  const isRecent = state.viewMode === 'recent7' || state.viewMode === 'recent30';
+  const isRecent = state.viewMode === 'recent7' || state.viewMode === 'recent30' || state.viewMode === 'recent90';
   const labelStep = Math.max(1, Math.floor(barCount / 15));
   allDates.forEach((d, i) => {
     if (i % labelStep !== 0 && i !== allDates.length - 1) return;
@@ -299,8 +299,8 @@ function getMergedDomainData() {
   return merged;
 }
 
-// ── 域名占比环形图（Top 7 + 其他，点击扇区/图例联动表格） ──
-const DONUT_MAX_SLICES = 7;
+// ── 域名占比环形图（Top 5 + 其他，Reasonix 风格色板，点击扇区/图例联动表格） ──
+const DONUT_MAX_SLICES = 5;
 
 /** 极坐标 → 直角坐标（0° 指向 12 点方向，顺时针） */
 function polarToCartesian(cx, cy, r, angleDeg) {
@@ -625,7 +625,7 @@ async function refresh() {
     downloadP = getDownloadAggregated(state.year);
     state.chartDates = getMonthDates(state.year, state.month);
   } else {
-    const days = state.viewMode === 'recent7' ? 7 : 30;
+    const days = state.viewMode === 'recent7' ? 7 : (state.viewMode === 'recent90' ? 90 : 30);
     browseP = getRecentBrowseAggregated(days);
     downloadP = getRecentDownloadAggregated(days);
     state.chartDates = getRecentDateKeys(days);
@@ -766,7 +766,10 @@ function renderDayPicker(year, month) {
     const heat = heatLevel(dayTotals[dayStr] || 0);
     if (heat > 0) cls += ` has-data heat-${heat}`;
     if (state.selectedDay === dayStr) cls += ' selected';
-    html += `<div class="${cls}" data-day="${dayStr}">${d}</div>`;
+    const dayBytes = dayTotals[dayStr] || 0;
+    const dayDomains = dayBytes > 0 ? (mergedData[dayStr] ? Object.keys(mergedData[dayStr]).length : 0) : 0;
+    const tip = dayBytes > 0 ? ` title="${dayStr}: ${formatBytes(dayBytes)}（${dayDomains} 个域名）"` : '';
+    html += `<div class="${cls}"${tip} data-day="${dayStr}">${d}</div>`;
   }
 
   grid.innerHTML = html;
@@ -879,6 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewButtons = [
     ['viewRecent7Btn', 'recent7', '近7天域名排行'],
     ['viewRecent30Btn', 'recent30', '近30天域名排行'],
+    ['viewRecent90Btn', 'recent90', '近90天域名排行'],
     ['viewMonthBtn', 'month', '域名排行'],
     ['viewYearBtn', 'year', '年度域名排行']
   ];
@@ -892,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.view-toggle').forEach(b => b.classList.remove('active'));
       document.getElementById(btnId).classList.add('active');
       const isMonth = mode === 'month';
-      const isRecent = mode === 'recent7' || mode === 'recent30';
+      const isRecent = mode === 'recent7' || mode === 'recent30' || mode === 'recent90';
       document.getElementById('yearSelect').style.display = isRecent ? 'none' : '';
       document.getElementById('monthSelect').style.display = isMonth ? '' : 'none';
       document.getElementById('dayPicker').style.display = isMonth ? '' : 'none';
@@ -1049,3 +1053,4 @@ window.addEventListener('resize', () => {
   updateTrendChart();
   if (state.selectedDomain) showDomainDetail(state.selectedDomain);
 });
+

@@ -1018,3 +1018,57 @@ body {
 .chart-container svg [data-day]:hover { opacity: 0.7; }
 .chart-container svg .bar-anim.selected-day { stroke: var(--accent-strong); stroke-width: 1.5; }
 .chart-container svg .dot-anim.selected-day { stroke: var(--accent-strong); stroke-width: 2; }
+
+/* ══ Reasonix 风格增强：Primer 图表色板（Top5 多彩 + Other 灰，柔和化） ══ */
+:root {
+  --donut-1: color-mix(in srgb, #1f883d 70%, var(--card-bg));
+  --donut-2: color-mix(in srgb, #9a6700 70%, var(--card-bg));
+  --donut-3: color-mix(in srgb, #1f6feb 70%, var(--card-bg));
+  --donut-4: color-mix(in srgb, #8250df 70%, var(--card-bg));
+  --donut-5: color-mix(in srgb, #bf3989 70%, var(--card-bg));
+  --donut-6: color-mix(in srgb, #8c959f 80%, var(--card-bg));
+}
+:root[data-theme="dark"] {
+  --donut-1: color-mix(in srgb, #3fb950 70%, var(--card-bg));
+  --donut-2: color-mix(in srgb, #d29922 70%, var(--card-bg));
+  --donut-3: color-mix(in srgb, #58a6ff 70%, var(--card-bg));
+  --donut-4: color-mix(in srgb, #bc8cff 70%, var(--card-bg));
+  --donut-5: color-mix(in srgb, #f778ba 70%, var(--card-bg));
+  --donut-6: color-mix(in srgb, #6e7681 80%, var(--card-bg));
+}
+
+/* 环形图 hover：分段描边加粗（viewBox 200 内留 5px 边距，不裁切）*/
+.donut-svg .donut-seg {
+  transition: opacity 0.15s, stroke-width 0.15s;
+}
+.donut-svg .donut-seg:hover {
+  opacity: 0.9;
+  stroke-width: 30;
+}
+
+/* 趋势图 hover：柱/点加亮（Reasonix 风格的高亮反馈） */
+.chart-container svg .bar-anim:hover {
+  opacity: 1;
+  filter: brightness(1.12);
+}
+.chart-container svg .dot-anim:hover {
+  opacity: 1;
+  filter: brightness(1.15);
+}
+
+/* 面板卡片 hover：阴影缓升 */
+.main-content > .section {
+  transition: box-shadow 0.25s ease;
+}
+.main-content > .section:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* 热力日历格 hover 放大（配合 tooltip） */
+.dp-cell.has-data {
+  transition: transform 0.12s ease;
+}
+.dp-cell.has-data:hover {
+  transform: scale(1.12);
+  z-index: 1;
+}
