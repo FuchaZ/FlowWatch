@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 576" style="width:100%;max-width:1024px;height:auto">
+    <defs><style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap');</style>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6b7280"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#d97706"/></marker>
+    </defs>
+
+    <!-- ══ 浏览器外部环境（虚线灰框） ══ -->
+    <rect x="32" y="120" width="176" height="300" rx="8" fill="rgba(31,41,55,0.02)" stroke="rgba(31,41,55,0.25)" stroke-width="0.8" stroke-dasharray="6,3"/>
+    <rect x="40" y="112" width="72" height="16" rx="2" fill="#fafaf9"/>
+    <text x="76" y="125" fill="rgba(31,41,55,0.45)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">BROWSER</text>
+
+    <!-- ══ 扩展隐私边界（金色虚线框） ══ -->
+    <rect x="240" y="120" width="752" height="300" rx="8" fill="rgba(217,119,6,0.04)" stroke="rgba(217,119,6,0.45)" stroke-width="0.8" stroke-dasharray="5,4"/>
+    <rect x="248" y="112" width="212" height="16" rx="2" fill="#fafaf9"/>
+    <text x="354" y="125" fill="rgba(217,119,6,0.85)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">FLOWWATCH EXTENSION · 隐私边界</text>
+
+    <!-- ══ 箭头（先于节点绘制） ══ -->
+    <!-- 网页 → background.js：流量事件 -->
+    <path d="M 192,308 H 256 Q 264,308 264,300 V 218 Q 264,210 272,210" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="202" y="288" width="52" height="14" rx="2" fill="#fafaf9"/>
+    <text x="228" y="298" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">流量事件</text>
+
+    <!-- background.js → storage：每秒 flush（核心数据路径，金色） -->
+    <line x1="382" y1="252" x2="382" y2="288" stroke="#d97706" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <rect x="390" y="264" width="72" height="14" rx="2" fill="#fafaf9"/>
+    <text x="426" y="274" fill="#d97706" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">每秒 flush</text>
+
+    <!-- storage → dashboard：读取聚合 -->
+    <path d="M 492,308 H 544 Q 552,308 552,300 V 218 Q 552,210 560,210" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="502" y="288" width="52" height="14" rx="2" fill="#fafaf9"/>
+    <text x="528" y="298" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">读取聚合</text>
+
+    <!-- storage → popup：读取汇总 -->
+    <line x1="492" y1="368" x2="560" y2="368" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="502" y="348" width="52" height="14" rx="2" fill="#fafaf9"/>
+    <text x="528" y="358" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">读取汇总</text>
+
+    <!-- ══ 节点 ══ -->
+    <!-- 浏览器网页 -->
+    <rect x="48" y="280" width="144" height="56" rx="6" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+    <g transform="translate(60, 296)" fill="none" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a17 17 0 0 1 0 18"/><path d="M12 3a17 17 0 0 0 0 18"/>
+    </g>
+    <text x="120" y="306" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">浏览器网页</text>
+    <text x="120" y="322" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">webRequest · downloads</text>
+
+    <!-- background.js（核心采集） -->
+    <rect x="272" y="168" width="220" height="84" rx="6" fill="rgba(217,119,6,0.08)" stroke="#d97706" stroke-width="1.4"/>
+    <g transform="translate(284, 180)" fill="none" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+    </g>
+    <text x="382" y="204" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">background.js</text>
+    <text x="382" y="222" fill="#6b7280" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Service Worker · 采集与 flush</text>
+    <text x="382" y="236" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">webRequest · downloads · alarms</text>
+
+    <!-- chrome.storage.local（数据核心） -->
+    <rect x="272" y="296" width="220" height="84" rx="6" fill="rgba(217,119,6,0.08)" stroke="#d97706" stroke-width="1.4"/>
+    <g transform="translate(284, 308)" fill="none" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/>
+    </g>
+    <text x="382" y="332" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">chrome.storage.local</text>
+    <text x="382" y="350" fill="#6b7280" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">按日聚合 · 域名明细</text>
+    <text x="382" y="364" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">traffic_* · tracked_dates · excluded</text>
+
+    <!-- dashboard 主面板 -->
+    <rect x="560" y="168" width="200" height="84" rx="6" fill="#ffffff" stroke="rgba(31,41,55,0.25)" stroke-width="1"/>
+    <g transform="translate(572, 180)" fill="none" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19l16 0"/><path d="M4 15l4 -6l4 2l4 -5l4 4"/>
+    </g>
+    <text x="660" y="204" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">dashboard 主面板</text>
+    <text x="660" y="222" fill="#6b7280" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">趋势图 · 环形图 · 热力日历</text>
+    <text x="660" y="236" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">域名表 · CSV 导出 · 暗色模式</text>
+
+    <!-- popup 弹窗 -->
+    <rect x="560" y="296" width="200" height="84" rx="6" fill="#ffffff" stroke="rgba(31,41,55,0.25)" stroke-width="1"/>
+    <g transform="translate(572, 308)" fill="none" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="5" width="16" height="14" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/>
+    </g>
+    <text x="660" y="332" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">popup 弹窗</text>
+    <text x="660" y="350" fill="#6b7280" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">今日/本月 Top10</text>
+    <text x="660" y="364" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">一键排除 · 快捷查看</text>
+
+    <!-- ══ 图例（底部横条） ══ -->
+    <line x1="32" y1="516" x2="992" y2="516" stroke="rgba(31,41,55,0.12)" stroke-width="0.8"/>
+    <text x="32" y="530" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+    <line x1="120" y1="528" x2="152" y2="528" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="160" y="532" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace">本地事件流</text>
+
+    <line x1="268" y1="528" x2="300" y2="528" stroke="#d97706" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <text x="308" y="532" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace">核心数据路径</text>
+
+    <rect x="412" y="520" width="16" height="16" rx="4" fill="rgba(217,119,6,0.08)" stroke="#d97706" stroke-width="1.4"/>
+    <text x="436" y="532" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace">核心组件</text>
+
+    <rect x="532" y="520" width="16" height="16" rx="4" fill="none" stroke="rgba(217,119,6,0.45)" stroke-width="0.8" stroke-dasharray="5,4"/>
+    <text x="556" y="532" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace">隐私边界</text>
+
+    <rect x="652" y="520" width="16" height="16" rx="4" fill="none" stroke="rgba(31,41,55,0.25)" stroke-width="0.8" stroke-dasharray="6,3"/>
+    <text x="676" y="532" fill="#6b7280" font-size="8" font-family="'Geist Mono', monospace">外部环境</text>
+  </svg>
+

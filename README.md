@@ -44,6 +44,10 @@ GitHub Actions 会在 push/PR 时自动执行以上检查。
 - 零框架 · 纯原生 JS + CSS 变量（暗色主题）+ 内联 SVG
 - chrome.webRequest / chrome.downloads / chrome.storage
 
+### 架构
+
+![FlowWatch 架构](docs/flowwatch-architecture.svg)
+
 ### 隐私
 
 所有数据存储在 `chrome.storage.local`，永不上传。扩展只读取响应大小和 `content-length` 头，**从不读取请求/响应内容**。`<all_urls>` 权限仅用于统计各域名流量。
@@ -96,6 +100,10 @@ GitHub Actions runs both on every push/PR.
 - Manifest V3 · Service Worker
 - Zero frameworks · Vanilla JS + CSS variables (dark theme) + inline SVG
 - chrome.webRequest / chrome.downloads / chrome.storage
+
+### Architecture
+
+![FlowWatch architecture](docs/flowwatch-architecture.svg)
 
 ### Privacy
 
