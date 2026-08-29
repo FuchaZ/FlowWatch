@@ -70,7 +70,7 @@
     </g>
     <text x="660" y="204" fill="#1f2937" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">dashboard 主面板</text>
     <text x="660" y="222" fill="#6b7280" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">趋势图 · 环形图 · 热力日历</text>
-    <text x="660" y="236" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">域名表 · CSV 导出 · 暗色模式</text>
+    <text x="660" y="236" fill="#9ca3af" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">域名排行 · CSV 导出 · 暗色模式</text>
 
     <!-- popup 弹窗 -->
     <rect x="560" y="296" width="200" height="84" rx="6" fill="#ffffff" stroke="rgba(31,41,55,0.25)" stroke-width="1"/>
