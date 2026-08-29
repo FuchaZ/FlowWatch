@@ -18,9 +18,9 @@ Chromium MV3 扩展，按域名统计浏览/下载流量，按月/年查看趋�
 | `background.js` | service worker: webRequest 拦截、downloads 监听、域名归一化、批量 flush、崩溃恢复 |
 | `dataService.js` | 所有 `chrome.storage.local` 读写操作：日期管理、浏览/下载聚合、排除管理、存储用量、自动剪枝 |
 | `shared.js` | 共享函数：`createFavicon(domain)`（三级解析）、`animateNumber`、`formatBytes(bytes)`、`DEFAULT_FAVICON` |
-| `popup.js` + `.html` + `.css` | 弹出面板：今日/本月 Top 10 排名 + 排除按钮 |
-| `dashboard.js` + `.html` + `.css` | 完整仪表盘：年月切换、摘要卡片、SVG 趋势图、域名排行、域名详情、SVG 细分柱状图、排除管理、CSV 导出、数据重置、存储条 |
-| `generate_icon.ps1` | PowerShell 脚本生成深海蓝色系图标（渐变底 + 白色环形图 + 琥珀金数据点），16~128px 多尺寸 |
+| `popup.js` + `.html` + `.css` | 弹出面板：今日/本月切换 + 总流量卡 + Top 10 域名排行（带占比副行） |
+| `dashboard.js` + `.html` + `.css` | 仪表盘：概览卡、年月切换、SVG 趋势图、域名占比环形图、域名排行行列表、域名详情、SVG 细分柱状图、排除管理、CSV 导出、数据重置、存储卡 |
+| `generate_icon.ps1` | PowerShell 脚本生成浅灰底+钢青蓝环图标（白底圆角 + 钢青蓝环形弧 + 暖沙数据点），16~128px 多尺寸 |
 
 ## 数据模型
 
@@ -51,7 +51,7 @@ pending_downloads_raw → [ ... ]                    未 flush 的下载明细
 - **下载采集**：`chrome.downloads.onChanged` 检测 `state:'complete'`，用 `chrome.downloads.search({id})` 补全 `fileSize` 和 URL。
 - **排除机制**：`background.js` 维护内存 `excludedDomains` Set，`chrome.storage.onChanged` 同步。Popup/Dashboard 通过 dataService 读写。
 - **Favicon**：`createFavicon(domain)` 三级解析 —— ① 直连 `/favicon.ico`（原域 → 根域 → CDN 映射主站）；② 抓主站主页 HTML 前 64KB 解析 `<link rel=icon>`；③ `favicon.im` 兜底（Cloudflare，国内可达，带熔断）。**CDN 映射表 `CDN_OWNER_MAP`**（shared.js）：hdslb.com / bilivideo.* / githubassets.com / aliyuncs.com 等 ~35 个平台 CDN 域名映射到主站取图标。带会话级缓存（`faviconCache` Map，Promise 去重）+ 并发信号量（≤6）。全部失败 → 灰色 SVG base64 占位。**新遇到没图标的 CDN 域名：在 `CDN_OWNER_MAP` 补一条即可覆盖整类。**
-- **SVG 图表**：`drawChart()` / `drawDetailChart()` 生成 `<rect>`/`<polyline>`/`<circle>` SVG，使用 `viewBox` 自适应缩放，`Date.now()` 后缀防 gradiant id 冲突。趋势图柱/点带 `data-day` 属性 + `<title>` 原生 tooltip，点击可跳转到对应日期的统计数据（自动切回月度视图并选中该日）。主图柱状图支持**浏览/下载堆叠**（`opts.stackValues`），折线模式带渐变面积填充，峰值日金色高亮。**配色系统**：石墨黑金（浅色暖灰白底 #fafaf9 + 石墨黑主色 #1f2937 + 金色下载 #d97706；暗色近黑底 #0c0c0d + 金色激活 #f59e0b；浏览=石墨/亮灰、下载=金），全部 CSS 变量控制（dashboard.css / popup.css `:root` + `[data-theme=dark]`），图表颜色由 CSS 变量接管。域名占比环形图 `drawDonut()`（Top 5 + 其他，点击扇区/图例联动表格）。
+- **SVG 图表**：`drawChart()` / `drawDetailChart()` 生成 `<rect>`/`<polyline>`/`<circle>` SVG，使用 `viewBox` 自适应缩放，`Date.now()` 后缀防 gradiant id 冲突。趋势图柱/点带 `data-day` 属性 + `<title>` 原生 tooltip，点击可跳转到对应日期的统计数据（自动切回月度视图并选中该日）。主图柱状图支持**浏览/下载堆叠**（`opts.stackValues`），峰值日金色高亮。**配色系统**：仿 patina 默认主题（中性灰面板 + 钢青蓝 accent）——浅色 bg #f4f4f4/#fbfbfb + accent #315f9f + participation 蓝 #3f74c2，暗色 #212121/#262626 + accent #8ba1c0；浏览=中性蓝灰 #8f98a8（亮）/ #9aa4b2（暗）、下载=暖金褐 #9a6700（亮）/ #c19b5c（暗）、趋势线=蓝灰，全部 CSS 变量控制（dashboard.css / popup.css `:root` + `[data-theme=dark]`），图表颜色由 CSS 变量接管。环形图采用 patina 官方类别色板（--donut-1~6：钢蓝/绿/靛蓝/玫红/赭石/灰）。域名占比环形图 `drawDonut()`（Top 5 + 其他，点击扇区/图例联动行列表）。
 - **自动剪枝**：存储占用 >80% 时删除最旧 30 天数据。
 - **年份选择**：支持去年 + 今年（跨年日历翻月可同步）。
 
