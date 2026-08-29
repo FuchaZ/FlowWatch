@@ -28,6 +28,7 @@ async function renderDomainList(container, data, total, excluded) {
           <div class="domain-name">
             ${domain}
           </div>
+          <div class="domain-item-sub">占比 ${pct}%</div>
           <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
         </div>
         <div class="domain-bytes">${formatBytes(bytes)}</div>
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeBtn = document.getElementById('themeToggle');
   const syncThemeBtn = () => {
     const eff = currentEffectiveTheme();
-    themeBtn.textContent = eff === 'dark' ? '☀️' : '🌙';
+    themeBtn.innerHTML = eff === 'dark' ? THEME_ICON.sun : THEME_ICON.moon;
     const mode = getStoredTheme();
     themeBtn.title = `主题：${mode === 'auto' ? '跟随系统' : mode === 'dark' ? '深色' : '浅色'}（左键切换，右键恢复跟随系统）`;
   };

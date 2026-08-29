@@ -1,46 +1,46 @@
-/* ── 主题变量 ─────────────────────────────────────────────── */
+/* ── 主题变量（Patina default · 与 dashboard.css 同源） ── */
 :root {
-  --bg-top: #fafaf9;
-  --bg-bottom: #f5f5f4;
-  --text-primary: #18181b;
-  --text-body: #3f3f46;
-  --text-weak: #71717a;
-  --text-secondary: #a1a1aa;
-  --border: #e4e4e7;
-  --border-light: #e4e4e7;
+  --bg-top: #fbfbfb;
+  --bg-bottom: #f4f4f4;
+  --text-primary: #171717;
+  --text-body: #434343;
+  --text-weak: #707070;
+  --text-secondary: #adb3bd;
+  --border: #dddddd;
+  --border-light: #dddddd;
   --card-bg: #fff;
-  --card-hover-bg: #f4f4f5;
-  --accent: #1f2937;
-  --accent-light: #4b5563;
-  --bar-bg: #e4e4e7;
-  --red: #ef4444;
-  --red-soft: #fee2e2;
+  --card-hover-bg: #f5f5f5;
+  --accent: #315f9f;
+  --accent-light: #3f74c2;
+  --bar-bg: #e6e6e6;
+  --red: #b53a3a;
+  --red-soft: #f7e7e7;
   --on-accent: #fff;
-  --card-shadow-item: 0 2px 8px rgba(24,24,27,0.06);
-  --main-grad: linear-gradient(135deg, #1f2937, #111827);
-  --focus-ring: rgba(31,41,55,0.15);
+  --card-shadow-item: 0 1px 2px rgba(23,23,23,0.05);
+  --main-grad: linear-gradient(135deg, #35659f, #264b7d);
+  --focus-ring: rgba(49,95,159,0.18);
 }
 
 :root[data-theme="dark"] {
-  --bg-top: #0c0c0d;
-  --bg-bottom: #101012;
-  --text-primary: #fafafa;
-  --text-body: #d4d4d8;
-  --text-weak: #a1a1aa;
-  --text-secondary: #71717a;
-  --border: #27272a;
-  --border-light: #1f1f22;
-  --card-bg: #18181b;
-  --card-hover-bg: #1f1f22;
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --bar-bg: #27272a;
-  --red: #f87171;
-  --red-soft: #2a1414;
-  --on-accent: #18181b;
-  --card-shadow-item: 0 2px 8px rgba(0,0,0,0.5);
-  --main-grad: linear-gradient(135deg, #1f2937, #18181b);
-  --focus-ring: rgba(245, 158, 11, 0.25);
+  --bg-top: #262626;
+  --bg-bottom: #212121;
+  --text-primary: #d1d5dc;
+  --text-body: #b9bfc7;
+  --text-weak: #adb3bd;
+  --text-secondary: #707070;
+  --border: #404040;
+  --border-light: #3a3a3a;
+  --card-bg: #2d2d2d;
+  --card-hover-bg: #353535;
+  --accent: #8ba1c0;
+  --accent-light: #a5b8d1;
+  --bar-bg: #404040;
+  --red: #c98383;
+  --red-soft: #3d2b2b;
+  --on-accent: #22262b;
+  --card-shadow-item: 0 1px 3px rgba(0,0,0,0.35);
+  --main-grad: linear-gradient(135deg, #2d4e80, #223c63);
+  --focus-ring: rgba(139,161,192,0.28);
 }
 
 * {
@@ -55,6 +55,7 @@ body {
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
   background-attachment: fixed;
   color: var(--text-body);
+  font-variant-numeric: tabular-nums;
 }
 
 #app {
@@ -90,14 +91,19 @@ body {
 }
 
 .period-btn.active {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent);
+  background: var(--accent-soft-2, #e8eef6);
+  color: var(--accent);
+  font-weight: 600;
+  border-color: transparent;
+}
+
+:root[data-theme="dark"] .period-btn.active {
+  background: var(--accent-soft-2, #333b46);
 }
 
 .total-section {
   background: var(--main-grad);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
   margin-bottom: 16px;
   color: #fff;
@@ -110,8 +116,9 @@ body {
 }
 
 .total-value {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .total-breakdown {
@@ -130,10 +137,10 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--card-bg);
-  border-radius: 8px;
-  margin-bottom: 6px;
+  border-radius: 10px;
+  margin-bottom: 8px;
   transition: background 0.15s, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -194,24 +201,28 @@ body {
 
 .domain-bytes {
   font-size: 12px;
-  color: var(--accent);
+  color: var(--text-primary);
   font-weight: 600;
   margin-left: 8px;
   white-space: nowrap;
 }
 
 .bar-bg {
-  height: 3px;
+  height: 4px;
   background: var(--bar-bg);
   border-radius: 2px;
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
 .bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  background: linear-gradient(90deg, #98a1b0, #87919f);
   border-radius: 2px;
   transition: width 0.3s;
+}
+
+:root[data-theme="dark"] .bar-fill {
+  background: linear-gradient(90deg, #a8b0bc, #8f98a8);
 }
 
 .loading {
@@ -266,14 +277,23 @@ body {
 
 .theme-toggle {
   margin-left: auto;
-  padding: 4px 8px;
+  width: 28px;
+  height: 26px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--card-bg);
   cursor: pointer;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  transition: all 0.15s;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.theme-toggle svg {
+  width: 13px;
+  height: 13px;
 }
 
 .theme-toggle:hover {
@@ -281,23 +301,11 @@ body {
   border-color: var(--accent);
 }
 
-/* 总流量卡片装饰光晕 */
+/* 总流量 hero 卡 */
 .total-section {
   position: relative;
   overflow: hidden;
   animation: fadeInUp 0.35s ease both;
-}
-
-.total-section::after {
-  content: '';
-  position: absolute;
-  top: -40px;
-  right: -30px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
-  pointer-events: none;
 }
 
 @keyframes fadeInUp {
@@ -346,4 +354,11 @@ body {
 }
 .domain-item.enter {
   animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 域名行占比副行（patina 双行风格） */
+.domain-item-sub {
+  font-size: 11px;
+  color: var(--text-weak);
+  margin-top: 3px;
 }

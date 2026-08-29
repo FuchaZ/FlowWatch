@@ -264,7 +264,7 @@ function updateSummary(dailyData, monthlyData, dlDailyData, dlMonthlyData) {
   // "追踪天数"与窗口无关（从开始统计至今）；窗口内活跃天数仅用于日均计算
   animateNumber(document.getElementById('activeDays'), state.trackedDays, v => Math.round(v) + ' 天');
   animateNumber(document.getElementById('avgDaily'), avg, v => formatBytes(v) + '/天');
-  document.getElementById('peakDay').textContent = peakDate ? `${peakDate} (${formatBytes(peakVal)})` : '-';
+  document.getElementById('peakDay').textContent = peakDate ? `${peakDate.slice(5)} · ${formatBytes(peakVal)}` : '-';
 }
 
 /**
@@ -332,7 +332,7 @@ function drawDonut() {
   const restBytes = entries.slice(DONUT_MAX_SLICES).reduce((s, [, v]) => s + v.browse + v.download, 0);
   if (restBytes > 0) slices.push({ domain: '其他', bytes: restBytes });
 
-  const cx = 100, cy = 100, r = 80, strokeW = 22;
+  const cx = 100, cy = 100, r = 78, strokeW = 30;
   let angle = -90;
   let svgContent = '';
   slices.forEach((s, i) => {
@@ -358,7 +358,7 @@ function drawDonut() {
     state.selectedDomain = domain;
     updateDomainTable(state.monthlyData, state.downloadMonthlyData);
     showDomainDetail(domain);
-    document.getElementById('domainTable').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('domainList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     drawDonut(); // 刷新图例 active 状态
   };
   svg.querySelectorAll('.donut-seg').forEach(seg => {
@@ -370,7 +370,7 @@ function drawDonut() {
 }
 
 function updateDomainTable(browseMonthly, dlMonthly) {
-  const tbody = document.getElementById('domainBody');
+  const list = document.getElementById('domainList');
 
   let entries = Object.entries(getMergedDomainData());
 
@@ -396,11 +396,12 @@ function updateDomainTable(browseMonthly, dlMonthly) {
   if (entries.length === 0) {
     const hasFilter = state.searchQuery || state.trafficType !== 'all' || state.excludedDomains.size > 0;
     const msg = hasFilter ? '没有匹配的域名' : '还没有流量记录，浏览网页后会自动统计';
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:30px">${msg}</td></tr>`;
+    list.innerHTML = `<div class="domain-list-empty">${msg}</div>`;
     return;
   }
 
-  tbody.innerHTML = entries.map(([domain, v], idx) => {
+  // patina 应用排行风格行：elevated 圆角行 + favicon + 域名/类型 + 右侧数字 + 占比副行 + 进度条
+  list.innerHTML = entries.map(([domain, v], idx) => {
     const total = v.browse + v.download;
     const pct = grandTotal > 0 ? (total / grandTotal * 100) : 0;
     const isSelected = state.selectedDomain === domain;
@@ -409,44 +410,43 @@ function updateDomainTable(browseMonthly, dlMonthly) {
     if (v.browse > 0 && v.download === 0) typeLabel = '<span class="tag-browse">浏览</span>';
     else if (v.download > 0 && v.browse === 0) typeLabel = '<span class="tag-download">下载</span>';
     else typeLabel = '<span class="tag-mixed">混合</span>';
-    return `<tr class="${isSelected ? 'selected' : ''}${isExcluded ? ' excluded' : ''}" data-domain="${domain}">
-      <td class="col-rank">${isExcluded ? '—' : idx + 1}</td>
-      <td class="col-type">${typeLabel}</td>
-      <td class="col-domain">
-        ${domain}${isExcluded ? ' <span style="color:var(--red);font-size:11px">(已排除)</span>' : ''}
-        <div class="domain-row-bar"><div class="domain-row-fill" style="width:${pct}%"></div></div>
-      </td>
-      <td class="col-bytes">${formatBytes(total)}</td>
-      <td class="col-breakdown">
-        ${v.download > 0 ? `<span class="dl-part">下载 ${formatBytes(v.download)}</span>` : ''}
-        ${v.browse > 0 && v.download > 0 ? `<span class="browse-part">浏览 ${formatBytes(v.browse)}</span>` : ''}
-      </td>
-      <td class="col-action">
+    const subParts = [`<span>占比 ${pct.toFixed(1)}%</span>`];
+    if (v.download > 0) subParts.push(`<span class="dl-part">下载 ${formatBytes(v.download)}</span>`);
+    if (v.browse > 0) subParts.push(`<span class="browse-part">浏览 ${formatBytes(v.browse)}</span>`);
+    return `<div class="domain-row${isSelected ? ' selected' : ''}${isExcluded ? ' excluded' : ''}" data-domain="${domain}">
+      <div class="domain-row-head">
+        <span class="domain-row-rank">${isExcluded ? '—' : idx + 1}</span>
+        <span class="domain-row-favicon"></span>
+        <span class="domain-row-name">${domain}${isExcluded ? ' <span class="excluded-mark">已排除</span>' : ''}</span>
+        ${typeLabel}
+        <span class="domain-row-bytes">${formatBytes(total)}</span>
         ${isExcluded
           ? `<button class="restore-domain-btn" data-action="restore" data-domain="${domain}">恢复</button>`
           : `<button class="exclude-domain-btn" data-action="exclude" data-domain="${domain}">排除</button>`}
-      </td>
-    </tr>`;
+      </div>
+      <div class="domain-row-sub">${subParts.join('')}</div>
+      <div class="domain-row-bar"><div class="domain-row-fill" style="width:${pct}%"></div></div>
+    </div>`;
   }).join('');
 
-  tbody.querySelectorAll('.col-domain').forEach(cell => {
-    const tr = cell.closest('tr');
-    if (tr && tr.dataset.domain) {
-      cell.insertBefore(createFavicon(tr.dataset.domain), cell.firstChild);
+  list.querySelectorAll('.domain-row-favicon').forEach(holder => {
+    const row = holder.closest('.domain-row');
+    if (row && row.dataset.domain) {
+      holder.appendChild(createFavicon(row.dataset.domain));
     }
   });
 
-  tbody.querySelectorAll('tr').forEach(tr => {
-    tr.addEventListener('click', (e) => {
+  list.querySelectorAll('.domain-row').forEach(row => {
+    row.addEventListener('click', (e) => {
       if (e.target.closest('button')) return;
-      state.selectedDomain = tr.dataset.domain;
+      state.selectedDomain = row.dataset.domain;
       showDomainDetail(state.selectedDomain);
-      document.querySelectorAll('#domainBody tr').forEach(r => r.classList.remove('selected'));
-      tr.classList.add('selected');
+      list.querySelectorAll('.domain-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
     });
   });
 
-  tbody.querySelectorAll('[data-action="exclude"]').forEach(btn => {
+  list.querySelectorAll('[data-action="exclude"]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const domain = btn.dataset.domain;
@@ -461,7 +461,7 @@ function updateDomainTable(browseMonthly, dlMonthly) {
     });
   });
 
-  tbody.querySelectorAll('[data-action="restore"]').forEach(btn => {
+  list.querySelectorAll('[data-action="restore"]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const domain = btn.dataset.domain;
@@ -577,7 +577,7 @@ async function showDomainDetail(domain) {
   document.getElementById('detailTotal').textContent = formatBytes(total);
   document.getElementById('detailBreakdown').innerHTML = `
     <span style="color:var(--accent)">浏览 ${formatBytes(browseBytes)}</span>
-    ${dlBytes > 0 ? `<span style="color:var(--orange);margin-left:12px">下载 ${formatBytes(dlBytes)}</span>` : ''}
+    ${dlBytes > 0 ? `<span style="color:var(--download-color);margin-left:12px">下载 ${formatBytes(dlBytes)}</span>` : ''}
   `;
   document.getElementById('detailAvg').textContent = formatBytes(avg) + '/天';
   document.getElementById('detailPeak').textContent = peakDay ? `${peakDay} (${formatBytes(peakVal)})` : '-';
@@ -856,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeBtn = document.getElementById('themeToggle');
   const syncThemeBtn = () => {
     const eff = currentEffectiveTheme();
-    themeBtn.textContent = eff === 'dark' ? '☀️' : '🌙';
+    themeBtn.innerHTML = eff === 'dark' ? THEME_ICON.sun : THEME_ICON.moon;
     const mode = getStoredTheme();
     themeBtn.title = `主题：${mode === 'auto' ? '跟随系统' : mode === 'dark' ? '深色' : '浅色'}（左键切换，右键恢复跟随系统）`;
   };
@@ -923,7 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('closeDetail').addEventListener('click', () => {
     state.selectedDomain = null;
     document.getElementById('domainDetailSection').style.display = 'none';
-    document.querySelectorAll('#domainBody tr').forEach(r => r.classList.remove('selected'));
+    document.querySelectorAll('#domainList .domain-row').forEach(r => r.classList.remove('selected'));
   });
 
   document.getElementById('toggleExcludedBtn').addEventListener('click', () => {
@@ -1013,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fill = document.getElementById('storageFill');
     fill.style.width = (u.pct * 100).toFixed(1) + '%';
     if (u.pct > 0.8) fill.style.background = 'var(--red)';
-    else if (u.pct > 0.6) fill.style.background = 'var(--orange)';
+    else if (u.pct > 0.6) fill.style.background = 'var(--download-color)';
     if (u.pct > 0.8) {
       pruneOldData(30).then(pruned => {
         if (pruned > 0) console.log(`存储空间不足，已自动清理 ${pruned} 天前的旧数据`);
