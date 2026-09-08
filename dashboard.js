@@ -105,12 +105,15 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     interactive = true,
     fontSize = 11,
     stackValues = null,
-    overlayValues = null
+    overlayValues = null,
+    // 动态尺寸：默认按容器实际宽度重画（1:1 渲染不缩放），传 0 表示跟随容器
+    W = 0
   } = opts;
-  const W = 900;
+  const width = W || Math.max(320, Math.round(svg.clientWidth || svg.parentElement?.clientWidth) || 1200);
+  svg.setAttribute('viewBox', `0 0 ${width} ${H}`);
   const hasOverlay = !!(overlayValues && overlayValues.length);
   // 折线与柱共用左轴，无需右轴空间
-  const chartW = W - pad.left - pad.right;
+  const chartW = width - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
 
   const maxVal = Math.max(...values, 1);
@@ -137,7 +140,7 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
   // Y 轴网格与刻度（颜色由 CSS .grid-line / .axis-label 控制）
   for (let i = 0; i <= ySteps; i++) {
     const y = pad.top + chartH - (chartH * i / ySteps);
-    svgContent += `<line class="grid-line" x1="${pad.left}" y1="${y}" x2="${W - pad.right}" y2="${y}" stroke-width="1"/>`;
+    svgContent += `<line class="grid-line" x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke-width="1"/>`;
     svgContent += `<text class="axis-label" x="${pad.left - 8}" y="${y}" font-size="${fontSize}" text-anchor="end" dominant-baseline="middle">${formatBytes(yStepVal * i)}</text>`;
   }
 
@@ -520,6 +523,9 @@ function getDomainDailyValues(domain) {
 function updateTrendChart() {
   const svg = document.getElementById('trendChart');
   const allDates = state.chartDates;
+  // 主图动态尺寸：宽跟随容器，高被 CSS clamp 限制（读 svg 自身实际渲染尺寸，与 viewBox 1:1）
+  const box = svg.getBoundingClientRect();
+  const H = Math.max(200, Math.round(box.height) || 300);
   const merged = getMergedDailyData();
   const values = allDates.map(d => {
     const data = merged[d];
@@ -537,6 +543,7 @@ function updateTrendChart() {
   // 总流量趋势折线：折点对齐每根柱子的顶端
   const overlayValues = values;
   drawChart(svg, values, allDates, 'bar', {
+    H,
     stackValues: { browse: browseValues, download: downloadValues },
     overlayValues
   });

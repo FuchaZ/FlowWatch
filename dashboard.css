@@ -139,9 +139,9 @@ body {
 }
 
 #app {
-  max-width: 1100px;
+  max-width: min(1680px, 96vw);
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 32px;
 }
 
 .header {
@@ -360,10 +360,61 @@ body {
   color: var(--text-primary);
 }
 
+/* 布局三档：
+   <900px 单列竖排；900~1400px 趋势通栏 + 下方占比|排行两列；
+   >1400px 三列（趋势 | 占比+存储 | 排行） */
 .main-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.rank-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch; /* 行高由左列决定，右列锁定等高（底部对齐） */
+}
+
+.rank-grid > .rank-col:first-child {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+#excludedSection,
+#domainDetailSection {
+  grid-column: 1 / -1;
+}
+
+/* 中屏：趋势通栏（占满整行），rank-grid 两列 */
+
+@media (min-width: 1401px) {
+  .main-content {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  /* 大屏三列：趋势 | 占比+存储 | 排行 */
+  .main-content > .section:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+  }
+  .rank-grid {
+    grid-column: 2 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: stretch; /* 大屏三列保持等高（存储卡贴底 + 排行卡内滚动） */
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+  .rank-grid {
+    grid-column: 1;
+    grid-template-columns: 1fr;
+  }
 }
 
 .section {
@@ -444,8 +495,29 @@ body {
 
 .chart-container svg {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+}
+
+/* 主图：容器高度由 CSS clamp 控制（不盲目跟随行高），SVG 垂直居中 */
+.trend-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.trend-section .chart-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trend-section .chart-container svg {
+  width: 100%;
+  height: 100%;
+  max-height: 400px;
+  min-height: 240px;
 }
 
 /* SVG 图表颜色（JS 不再硬编码，全部由变量控制） */
@@ -660,8 +732,8 @@ body {
 }
 
 .donut-svg {
-  width: 224px;
-  height: 224px;
+  width: 260px;
+  height: 260px;
   margin-top: 6px;
 }
 
@@ -686,9 +758,9 @@ body {
 }
 
 .donut-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
   width: 100%;
   min-width: 0;
 }
@@ -865,17 +937,8 @@ body {
 }
 
 @media (max-width: 900px) {
-  .rank-grid {
-    grid-template-columns: 1fr;
-  }
   .header-controls {
     width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1021,12 +1084,12 @@ body {
   gap: 6px;
 }
 
-.overview-stat .card-value { font-size: 30px; }
+.overview-stat .card-value { font-size: 34px; }
 
 .overview-secondary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 48px;
   padding-top: 14px;
 }
 
@@ -1034,6 +1097,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 12px;
+  min-width: 200px;
 }
 
 .overview-mini-value {
@@ -1042,16 +1107,7 @@ body {
   color: var(--text-body);
 }
 
-/* ── 排行区两列（占比 | 排行） ─────────────────────────── */
-.rank-grid {
-  display: grid;
-  grid-template-columns: 5fr 7fr;
-  gap: 20px;
-}
-
-@media (max-width: 900px) {
-  .rank-grid { grid-template-columns: 1fr; }
-}
+/* 排行区布局已并入上方 .main-content 布局三档区块 */
 
 /* ── 域名排行行列表（patina 应用行风格） ───────────────── */
 .domain-list-v2 {
@@ -1168,10 +1224,16 @@ body {
   gap: 20px;
 }
 
+/* 存储卡：左列贴底对齐（与右列排行卡底部平齐） */
 .storage-card {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.storage-actions {
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 
@@ -1199,8 +1261,7 @@ body {
 .storage-actions {
   display: flex;
   gap: 10px;
-  margin-top: auto;
-  padding-top: 16px;
+  margin-top: 16px;
 }
 
 .storage-btn {
@@ -1225,7 +1286,7 @@ body {
   border-color: var(--red-border);
 }
 
-/* 排行卡锁定与左列同高，域名列表内部滚动（50 行也在卡内滚轮查看） */
+/* 排行卡：等高锁定 + 列表内部滚动（与左列底部平齐）；<900px 单列时自动高度 */
 .ranking-card {
   height: 0;
   min-height: 100%;
