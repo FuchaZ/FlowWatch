@@ -1,6 +1,6 @@
 {
   "name": "flowwatch",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "description": "FlowWatch 流量监控 - 按域名统计浏览/下载流量的浏览器扩展（数据全本地）",
   "private": true,
   "type": "module",
