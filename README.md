@@ -57,11 +57,11 @@ GitHub Actions 会在 push/PR 时自动执行以上检查。
 
 浅色模式：
 
-![FlowWatch 浅色模式](docs/screenshots/screenshot-light-v9.png)
+![FlowWatch 浅色模式](docs/screenshots/screenshot-light-v10.png)
 
 暗色模式：
 
-![FlowWatch 暗色模式](docs/screenshots/screenshot-dark-v9.png)
+![FlowWatch 暗色模式](docs/screenshots/screenshot-dark-v10.png)
 
 ---
 
@@ -115,11 +115,11 @@ All data lives in `chrome.storage.local`. Nothing is ever uploaded. The extensio
 
 Light mode:
 
-![FlowWatch light mode](docs/screenshots/screenshot-light-v9.png)
+![FlowWatch light mode](docs/screenshots/screenshot-light-v10.png)
 
 Dark mode:
 
-![FlowWatch dark mode](docs/screenshots/screenshot-dark-v9.png)
+![FlowWatch dark mode](docs/screenshots/screenshot-dark-v10.png)
 
 
 
