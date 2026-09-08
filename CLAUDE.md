@@ -16,7 +16,7 @@ Chromium MV3 扩展，按域名统计浏览/下载流量，按月/年查看趋�
 |---|---|
 | `manifest.json` | 权限: webRequest, downloads, storage, unlimitedStorage, alarms; host_permissions: `<all_urls>` |
 | `background.js` | service worker: webRequest 拦截、downloads 监听、域名归一化、批量 flush、崩溃恢复 |
-| `dataService.js` | 所有 `chrome.storage.local` 读写操作：日期管理、浏览/下载聚合、排除管理、存储用量、自动剪枝 |
+| `dataService.js` | 所有 `chrome.storage.local` 读写操作：日期管理、浏览/下载聚合、**域名分组归组**、排除管理、存储用量、自动剪枝 |
 | `shared.js` | 共享函数：`createFavicon(domain)`（三级解析）、`animateNumber`、`formatBytes(bytes)`、`DEFAULT_FAVICON` |
 | `popup.js` + `.html` + `.css` | 弹出面板：今日/本月切换 + 总流量卡 + Top 10 域名排行（带占比副行） |
 | `dashboard.js` + `.html` + `.css` | 仪表盘：概览卡、年月切换、SVG 趋势图、域名占比环形图、域名排行行列表、域名详情、SVG 细分柱状图、排除管理、CSV 导出、数据重置、存储卡 |
@@ -33,6 +33,7 @@ download_daily_YYYY-MM-DD      → { "domain": bytes, ... }  下载聚合
 download_raw_YYYY-MM-DD        → [ { url, hostname, root, fileName, fileSize, mime, time }, ... ]
 tracked_dates                   → [ "YYYY-MM-DD", ... ]     日期索引（有序）
 excluded_domains                → [ "domain", ... ]         排除列表
+domain_group_map               → { "child": "parent", ... } 用户自定义域名分组（覆盖预置；可选 key）
 ```
 
 ### chrome.storage.session 键（崩溃恢复）
@@ -48,6 +49,7 @@ pending_downloads_raw → [ ... ]                    未 flush 的下载明细
 
 - **Flush 策略**：每秒 `chrome.alarms` 触发一次 + 积累 100 条强制 flush。每 10 条写一次 `chrome.storage.session` 做崩溃恢复。
 - **域名归一化**：`getRootDomain(hostname)` 识别 ~120 个多段 TLD（国家域名 + `github.io`/`vercel.app`/`s3.amazonaws.com` 等平台域名）。会去掉尾部点、转小写、去掉 `www.`。
+- **域名分组**（v2.2.0）：同一主站的关联域名合并统计（如 `bilivideo.com`/`hdslb.com` → `bilibili.com`）。`dataService.js` 维护 `PRESET_GROUP_MAP`（40+ 条常用平台映射）+ 用户自定义 `domain_group_map`（storage，覆盖预置）；`initDomainGroups()` 启动时合并加载，`resolveGroup(domain)` 归组。**归组只发生在读取聚合时，原始数据不动**（可逆）：`aggregateDates()` / `getMergedDayData()` / `getMergedMonthData()` 累加前归组；dashboard「日选中」视图、域名详情（`getGroupMembers` 组维度取数）、细分域名列表（组内全部子域）同步归组。排行/环形图/CSV 行域名即主站，favicon 天然取主站图标；排除主站 = 排除整组。预置未覆盖的新平台：往 `PRESET_GROUP_MAP` 补一条。
 - **下载采集**：`chrome.downloads.onChanged` 检测 `state:'complete'`，用 `chrome.downloads.search({id})` 补全 `fileSize` 和 URL。
 - **排除机制**：`background.js` 维护内存 `excludedDomains` Set，`chrome.storage.onChanged` 同步。Popup/Dashboard 通过 dataService 读写。
 - **Favicon**：`createFavicon(domain)` 三级解析 —— ① 直连 `/favicon.ico`（原域 → 根域 → CDN 映射主站）；② 抓主站主页 HTML 前 64KB 解析 `<link rel=icon>`；③ `favicon.im` 兜底（Cloudflare，国内可达，带熔断）。**CDN 映射表 `CDN_OWNER_MAP`**（shared.js）：hdslb.com / bilivideo.* / githubassets.com / aliyuncs.com 等 ~35 个平台 CDN 域名映射到主站取图标。带会话级缓存（`faviconCache` Map，Promise 去重）+ 并发信号量（≤6）。全部失败 → 灰色 SVG base64 占位。**新遇到没图标的 CDN 域名：在 `CDN_OWNER_MAP` 补一条即可覆盖整类。**
@@ -55,6 +57,7 @@ pending_downloads_raw → [ ... ]                    未 flush 的下载明细
 - **自动剪枝**：存储占用 >80% 时删除最旧 30 天数据。
 - **年份选择**：支持去年 + 今年（跨年日历翻月可同步）。
 - **响应式布局**（dashboard.css 三档）：`#app` 宽 `min(1680px, 96vw)`；`.main-content` 三档——>1400px 三列 grid（趋势 `.trend-section` flex 撑满 + 图表 clamp 240~400px 垂直居中）、900~1400px 趋势通栏 + `.rank-grid` 两列（行高由左列决定，右列排行卡 `height:0 + min-height:100%` 等高锁定 + 列表内滚动，存储卡 flex 贴底）、<900px 单列竖排（等高锁定解除）。改布局只动 dashboard.css 的这三档 media query。
+- **细分域名折叠**（v2.2.0）：域名详情「细分域名」列表默认只展示前 20 项（按流量降序），超出显示「展开更多（还有 N 项）」按钮一次全部展开——CDN 节点型站点（如 B 站数百个节点域）不刷屏。< 20 项时直接全量展示。
 
 ## 流程图
 
