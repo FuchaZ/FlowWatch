@@ -12,6 +12,7 @@
 ### 功能
 
 - 📊 **流量统计** — 按域名统计浏览和下载流量，实时采集
+- 🖥️ **宽屏自适应** — 三档响应式排版：大屏三列并排、中屏趋势图通栏+两列、小屏单列；趋势图与坐标轴随容器尺寸自适应重绘
 - 📅 **日/月/年视图** — 概览数字卡 + 每日趋势 + 域名排行，日历选择器按日查看
 - 📈 **SVG 图表** — 浏览/下载堆叠柱状图 + 总流量趋势折线融合（折点对齐柱顶），**点击柱/点直接跳转到该日统计**（hover 有原生 tooltip）
 - 🔍 **域名详情** — 点击任意域名查看细分域名拆分和每日明细
@@ -69,6 +70,7 @@ GitHub Actions 会在 push/PR 时自动执行以上检查。
 ### Features
 
 - 📊 **Traffic tracking** — Browse/download bytes per domain, collected in real time
+- 🖥️ **Wide-screen adaptive** — Three responsive layouts: three columns on wide screens, full-width trend chart + two columns on mid-size, single column on narrow; charts and axis labels redraw to fit the container
 - 📅 **Day/Month/Year views** — Overview cards, daily trends, domain rankings, calendar day picker
 - 📈 **SVG charts** — Stacked browse/download bars fused with a total-traffic trend line; **click a bar/dot to jump to that day's stats** (native tooltip on hover)
 - 🔍 **Domain details** — Subdomain breakdown and daily history for any domain
