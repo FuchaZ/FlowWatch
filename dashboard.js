@@ -647,7 +647,8 @@ async function showDomainDetail(domain) {
     subList.innerHTML = '<div style="color:var(--text-secondary);font-size:12px">无细分数据</div>';
   } else {
     const subTotal = subdomains.reduce((a, b) => a + b[1], 0);
-    subList.innerHTML = subdomains.map(([hostname, bytes]) => {
+    const SUBDOMAIN_PREVIEW = 20; // 默认只展示前 20，避免 CDN 节点型站点数百行刷屏
+    const renderRows = (list) => list.map(([hostname, bytes]) => {
       const pct = (bytes / subTotal * 100).toFixed(1);
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-lighter);font-size:13px">
         <span style="color:var(--text-weak);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${hostname}</span>
@@ -655,6 +656,17 @@ async function showDomainDetail(domain) {
         <span style="color:var(--text-secondary);font-size:12px;width:48px;text-align:right">${pct}%</span>
       </div>`;
     }).join('');
+    if (subdomains.length > SUBDOMAIN_PREVIEW) {
+      const hidden = subdomains.length - SUBDOMAIN_PREVIEW;
+      subList.innerHTML = renderRows(subdomains.slice(0, SUBDOMAIN_PREVIEW)) +
+        `<button id="subdomainExpandBtn" class="chart-view-btn" style="margin-top:10px">展开更多（还有 ${hidden} 项）</button>`;
+      document.getElementById('subdomainExpandBtn').addEventListener('click', (e) => {
+        e.target.remove();
+        subList.insertAdjacentHTML('beforeend', renderRows(subdomains.slice(SUBDOMAIN_PREVIEW)));
+      });
+    } else {
+      subList.innerHTML = renderRows(subdomains);
+    }
   }
 }
 
