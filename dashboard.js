@@ -91,7 +91,7 @@ function applyChartAnimations(svg) {
  * @param {number} [opts.H=300] 画布高度
  * @param {Object} [opts.pad] 内边距 {top,right,bottom,left}
  * @param {number} [opts.ySteps=5] Y 轴刻度数
- * @param {number} [opts.barWidthMax=20] 柱宽上限
+ * @param {number} [opts.barWidthMax] 已废弃：柱宽由 slot 自适应计算（保留参数位避免旧调用报错）
  * @param {boolean} [opts.interactive=true] 是否带 data-day 点击跳转与 tooltip
  * @param {number} [opts.fontSize=11] 坐标轴文字字号
  * @param {{browse:number[], download:number[]}} [opts.stackValues] 堆叠模式：浏览(底)/下载(顶)两组每日值，仅 bar 模式生效
@@ -101,7 +101,7 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     H = 300,
     pad = { top: 20, right: 20, bottom: 45, left: 65 },
     ySteps = 5,
-    barWidthMax = 20,
+    barWidthMax, // 仅为向后兼容保留参数位；实际柱宽由 slot 自适应计算
     interactive = true,
     fontSize = 11,
     stackValues = null,
@@ -122,7 +122,10 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
   const yStepVal = niceMax / ySteps;
   const barCount = allDates.length;
   const barGap = interactive ? 2 : 1;
-  const barWidth = Math.min((chartW - barGap * (barCount + 1)) / barCount, barWidthMax);
+  // 柱宽自适应：柱少时放宽上限并拉开间隔，避免挤在左侧；柱多时收窄但保持可读
+  const slot = chartW / barCount;
+  const maxBarWidth = slot > 60 ? 34 : (slot > 30 ? 26 : (slot > 14 ? 12 : 6));
+  const barWidth = Math.max(3, Math.min(slot - (slot > 14 ? 4 : 1), maxBarWidth));
   // 峰值日（用于金色高亮，借鉴 GlassWire 峰值标识；全 0 时无峰值）
   const maxValAll = Math.max(...values);
   const peakIndex = maxValAll > 0 ? values.indexOf(maxValAll) : -1;
@@ -191,11 +194,18 @@ function drawChart(svg, values, allDates, mode, opts = {}) {
     });
   }
 
-  // X 轴日期标签（按密度抽样；近7/30天视图跨月时用 M/D 格式）
+  // X 轴日期标签：按像素预算抽样（每个标签至少 ~52px 宽度），末日期强制收尾并避让
   const isRecent = state.viewMode === 'recent7' || state.viewMode === 'recent30' || state.viewMode === 'recent90';
-  const labelStep = Math.max(1, Math.floor(barCount / 15));
-  allDates.forEach((d, i) => {
-    if (i % labelStep !== 0 && i !== allDates.length - 1) return;
+  const maxLabels = Math.max(3, Math.floor(chartW / 52));
+  const labelStep = Math.max(1, Math.ceil(barCount / maxLabels));
+  const labelIdx = [];
+  for (let i = 0; i < barCount; i += labelStep) labelIdx.push(i);
+  if (labelIdx[labelIdx.length - 1] !== barCount - 1) {
+    if (barCount - 1 - labelIdx[labelIdx.length - 1] < labelStep * 0.6) labelIdx.pop();
+    labelIdx.push(barCount - 1);
+  }
+  labelIdx.forEach((i) => {
+    const d = allDates[i];
     const x = pad.left + (chartW / barCount) * i + (chartW / barCount) / 2;
     const label = isRecent ? formatDateLabel(d) : `${parseInt(d.split('-')[2])}日`;
     svgContent += `<text class="axis-label" x="${x}" y="${H - pad.bottom + 12}" font-size="${fontSize}" text-anchor="middle">${label}</text>`;
@@ -210,7 +220,6 @@ const DETAIL_CHART_OPTS = {
   H: 200,
   pad: { top: 15, right: 20, bottom: 35, left: 65 },
   ySteps: 4,
-  barWidthMax: 15,
   interactive: false,
   fontSize: 10
 };
@@ -335,17 +344,25 @@ function drawDonut() {
   const restBytes = entries.slice(DONUT_MAX_SLICES).reduce((s, [, v]) => s + v.browse + v.download, 0);
   if (restBytes > 0) slices.push({ domain: '其他', bytes: restBytes });
 
-  const cx = 100, cy = 100, r = 78, strokeW = 30;
+  const cx = 100, cy = 100, r = 78, strokeW = 26;
+  // 段间隙：小扇区不小于 1.5°，避免细缝吞掉小段；用 stroke-dasharray 收两端更平滑
+  const GAP_DEG = slices.length > 1 ? Math.min(4, 360 / slices.length * 0.18) : 0;
   let angle = -90;
   let svgContent = '';
   slices.forEach((s, i) => {
     const frac = s.bytes / grandTotal;
     const sweep = frac * 360;
-    svgContent += `<path class="donut-seg" d="${describeArc(cx, cy, r, angle, angle + sweep)}" fill="none" stroke="var(--donut-${i + 1})" stroke-width="${strokeW}" data-domain="${s.domain}"><title>${s.domain}: ${formatBytes(s.bytes)}（${(frac * 100).toFixed(1)}%）</title></path>`;
+    const startA = angle + GAP_DEG / 2;
+    const endA = angle + sweep - GAP_DEG / 2;
+    if (endA - startA > 0.5) { // 过小的段直接画满（避免缝隙吃掉）
+      svgContent += `<path class="donut-seg" d="${describeArc(cx, cy, r, startA, endA)}" fill="none" stroke="var(--donut-${i + 1})" stroke-width="${strokeW}" data-domain="${s.domain}"><title>${s.domain}: ${formatBytes(s.bytes)}（${(frac * 100).toFixed(1)}%）</title></path>`;
+    } else {
+      svgContent += `<path class="donut-seg" d="${describeArc(cx, cy, r, angle, angle + sweep)}" fill="none" stroke="var(--donut-${i + 1})" stroke-width="${strokeW}" data-domain="${s.domain}"><title>${s.domain}: ${formatBytes(s.bytes)}（${(frac * 100).toFixed(1)}%）</title></path>`;
+    }
     angle += sweep;
   });
-  svgContent += `<text x="${cx}" y="${cy - 4}" text-anchor="middle" class="donut-total-text">${formatBytes(grandTotal)}</text>`;
-  svgContent += `<text x="${cx}" y="${cy + 14}" text-anchor="middle" class="donut-total-label">总流量</text>`;
+  svgContent += `<text x="${cx}" y="${cy - 2}" text-anchor="middle" class="donut-total-text">${formatBytes(grandTotal)}</text>`;
+  svgContent += `<text x="${cx}" y="${cy + 16}" text-anchor="middle" class="donut-total-label">总流量</text>`;
   svg.innerHTML = svgContent;
 
   legend.innerHTML = slices.map((s, i) => `

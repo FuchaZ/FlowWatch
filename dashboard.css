@@ -739,21 +739,23 @@ body {
 
 .donut-svg .donut-seg {
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, stroke-width 0.18s ease, filter 0.18s ease;
 }
 
 .donut-svg .donut-seg:hover {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 .donut-total-text {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   fill: var(--text-primary);
 }
 
 .donut-total-label {
-  font-size: 11px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
   fill: var(--text-secondary);
 }
 
@@ -1008,13 +1010,17 @@ body {
 .chart-container svg .bar-anim.selected-day { stroke: var(--accent-strong); stroke-width: 1.5; }
 .chart-container svg .dot-anim.selected-day { stroke: var(--accent-strong); stroke-width: 2; }
 
-/* 环形图 hover：分段描边加粗（viewBox 200 内留 5px 边距，不裁切）*/
+/* 环形图 hover：段轻微加粗外扩（30→33，viewBox 200 内不裁切），亮度提升 */
 .donut-svg .donut-seg {
-  transition: opacity 0.15s, stroke-width 0.15s;
+  transition: opacity 0.15s, stroke-width 0.18s ease, filter 0.18s ease;
 }
 .donut-svg .donut-seg:hover {
-  opacity: 0.9;
-  stroke-width: 34;
+  opacity: 1;
+  stroke-width: 33;
+  filter: brightness(1.06);
+}
+.donut-svg .donut-seg.active {
+  stroke-width: 31;
 }
 
 /* 趋势图 hover：柱/点加亮（Reasonix 风格的高亮反馈） */
