@@ -5,6 +5,7 @@ const RAW_PREFIX = 'traffic_raw_';
 const DL_RAW_PREFIX = 'download_raw_';
 const STORAGE_DATES = 'tracked_dates';
 const EXCLUDED_KEY = 'excluded_domains';
+const DOMAIN_GROUP_KEY = 'domain_group_map';
 
 const DEFAULT_FAVICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2Ij48cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIzIiBmaWxsPSIjZThlY2Y0Ii8+PGNpcmNsZSBjeD0iOCIgY3k9IjYiIHI9IjMiIGZpbGw9IiNkMGQ1ZGQiLz48cGF0aCBkPSJNNCAxMiBRIDggMTQgMTIgMTIiIHN0cm9rZT0iI2QwZDVkZCIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz48L3N2Zz4=';
 

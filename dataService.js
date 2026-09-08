@@ -1,4 +1,97 @@
 // 常量已在 shared.js 中定义
+// ── 域名分组（同一主站的关联域名合并统计，如 bilivideo.com → bilibili.com）──
+// 预置映射只覆盖明确的平台自有域名；用户自定义规则存在 storage（DOMAIN_GROUP_KEY），优先级更高。
+const PRESET_GROUP_MAP = {
+  // 哔哩哔哩
+  'hdslb.com': 'bilibili.com',
+  'bilivideo.cn': 'bilibili.com',
+  'bilivideo.com': 'bilibili.com',
+  'biliimg.com': 'bilibili.com',
+  'biliapi.net': 'bilibili.com',
+  'biliapi.com': 'bilibili.com',
+  'acgvideo.com': 'bilibili.com',
+  // GitHub
+  'githubassets.com': 'github.com',
+  'githubusercontent.com': 'github.com',
+  'github.io': 'github.com',
+  // 阿里 / 淘宝
+  'aliyuncs.com': 'aliyun.com',
+  'alicdn.com': 'aliyun.com',
+  'taobaocdn.com': 'taobao.com',
+  'tbcdn.cn': 'taobao.com',
+  'mmstat.com': 'taobao.com',
+  // 腾讯 / QQ
+  'qpic.cn': 'qq.com',
+  'qlogo.cn': 'qq.com',
+  'gtimg.cn': 'qq.com',
+  'gtimg.com': 'qq.com',
+  'myqcloud.com': 'tencent.com',
+  'qcloud.com': 'tencent.com',
+  'tencentcs.com': 'tencent.com',
+  // 字节跳动 / 抖音 / 头条
+  'volccdn.com': 'volcengine.com',
+  'byteimg.com': 'douyin.com',
+  'bytecdn.cn': 'douyin.com',
+  'douyinstatic.com': 'douyin.com',
+  'pstatp.com': 'toutiao.com',
+  'byteacctimg.com': 'toutiao.com',
+  // CSDN
+  'csdnimg.cn': 'csdn.net',
+  // 京东 / 拼多多
+  '360buyimg.com': 'jd.com',
+  'pddpic.com': 'yangkeduo.com',
+  // 网易 / 百度 / 华为 / 小米
+  '126.net': '163.com',
+  'ws126.net': '163.com',
+  'bdstatic.com': 'baidu.com',
+  'bcebos.com': 'baidu.com',
+  'myhuaweicloud.com': 'huawei.com',
+  'mi-img.com': 'xiaomi.com',
+  // 微博 / 知乎
+  'sinaimg.cn': 'weibo.com',
+  'sinajs.cn': 'weibo.com',
+  'zhimg.com': 'zhihu.com'
+};
+
+/** 内存缓存的分组规则（预置 + 用户自定义合并），由 initDomainGroups 加载 */
+let domainGroupMap = null;
+
+/**
+ * 加载分组规则（预置 + 用户自定义合并）。dashboard/popup 启动时调用一次。
+ */
+async function initDomainGroups() {
+  const result = await chrome.storage.local.get(DOMAIN_GROUP_KEY);
+  domainGroupMap = Object.assign({}, PRESET_GROUP_MAP, result[DOMAIN_GROUP_KEY] || {});
+}
+
+/**
+ * 域名归组：命中映射则返回主站域名，否则原样返回。
+ * 数据层不动，仅在聚合/显示时归组。
+ * @param {string} domain 已归一化的根域名
+ * @returns {string}
+ */
+function resolveGroup(domain) {
+  if (domainGroupMap === null) return domain; // 未初始化时安全降级
+  return domainGroupMap[domain] || domain;
+}
+
+/**
+ * 读取用户自定义分组规则（原始存储内容，管理界面用）
+ * @returns {Promise<Object>}
+ */
+async function getDomainGroupMap() {
+  const result = await chrome.storage.local.get(DOMAIN_GROUP_KEY);
+  return result[DOMAIN_GROUP_KEY] || {};
+}
+
+/**
+ * 设置用户自定义分组规则（整体覆盖）
+ * @param {Object} map domain → 主站
+ */
+async function setDomainGroupMap(map) {
+  await chrome.storage.local.set({ [DOMAIN_GROUP_KEY]: map || {} });
+  domainGroupMap = Object.assign({}, PRESET_GROUP_MAP, map || {});
+}
 
 /** 读取有流量记录的日期列表（升序） */
 async function getTrackedDates() {
@@ -48,7 +141,9 @@ async function aggregateDates(dates, dailyGetter) {
   const monthly = {};
   for (const [dateStr, data] of Object.entries(daily)) {
     for (const [domain, bytes] of Object.entries(data)) {
-      monthly[domain] = (monthly[domain] || 0) + bytes;
+      // 域名分组：关联域名（如 bilivideo.com）并入主站（bilibili.com）统计
+      const group = resolveGroup(domain);
+      monthly[group] = (monthly[group] || 0) + bytes;
     }
   }
   return { daily, monthly };
@@ -102,9 +197,15 @@ async function getMergedDayData(dateKey) {
     chrome.storage.local.get(DAILY_PREFIX + dateKey),
     chrome.storage.local.get(DL_DAILY_PREFIX + dateKey)
   ]);
-  const merged = { ...(browse[DAILY_PREFIX + dateKey] || {}) };
+  // 域名分组：关联域名并入主站
+  const merged = {};
+  for (const [domain, bytes] of Object.entries(browse[DAILY_PREFIX + dateKey] || {})) {
+    const g = resolveGroup(domain);
+    merged[g] = (merged[g] || 0) + bytes;
+  }
   for (const [domain, bytes] of Object.entries(dl[DL_DAILY_PREFIX + dateKey] || {})) {
-    merged[domain] = (merged[domain] || 0) + bytes;
+    const g = resolveGroup(domain);
+    merged[g] = (merged[g] || 0) + bytes;
   }
   return merged;
 }
@@ -125,11 +226,14 @@ async function getMergedMonthData(monthKey) {
   for (const date of dates) {
     const browseData = browseItems[date] || {};
     for (const [domain, bytes] of Object.entries(browseData)) {
-      aggregated[domain] = (aggregated[domain] || 0) + bytes;
+      // 域名分组：关联域名并入主站
+      const g = resolveGroup(domain);
+      aggregated[g] = (aggregated[g] || 0) + bytes;
     }
     const dlData = dlItems[date] || {};
     for (const [domain, bytes] of Object.entries(dlData)) {
-      aggregated[domain] = (aggregated[domain] || 0) + bytes;
+      const g = resolveGroup(domain);
+      aggregated[g] = (aggregated[g] || 0) + bytes;
     }
   }
   return aggregated;

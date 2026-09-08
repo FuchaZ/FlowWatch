@@ -286,8 +286,17 @@ function updateSummary(dailyData, monthlyData, dlDailyData, dlMonthlyData) {
 function getMergedDomainData() {
   let browse, download;
   if (state.selectedDay) {
-    browse = state.dailyData[state.selectedDay] || {};
-    download = state.downloadDailyData[state.selectedDay] || {};
+    // 日选中视图：daily 数据按域名分组归组后再合并（与月/年视图口径一致）
+    const grp = (obj) => {
+      const out = {};
+      for (const [domain, bytes] of Object.entries(obj)) {
+        const g = resolveGroup(domain);
+        out[g] = (out[g] || 0) + bytes;
+      }
+      return out;
+    };
+    browse = grp(state.dailyData[state.selectedDay] || {});
+    download = grp(state.downloadDailyData[state.selectedDay] || {});
   } else {
     browse = state.monthlyData;
     download = state.downloadMonthlyData;
@@ -526,13 +535,27 @@ function getMergedDailyData() {
  * @param {string} domain 域名
  * @returns {number[]} 当月每天字节数（无数据日为 0）
  */
+/** 该域名（或分组主站）的组内域名集合：分组映射的反向索引 */
+function getGroupMembers(domain) {
+  const members = new Set([domain]);
+  for (const [child, parent] of Object.entries(domainGroupMap || {})) {
+    if (parent === domain) members.add(child);
+  }
+  return members;
+}
+
 function getDomainDailyValues(domain) {
+  const members = getGroupMembers(domain);
   const domainDaily = {};
   for (const [date, data] of Object.entries(state.dailyData)) {
-    if (data[domain]) domainDaily[date] = data[domain];
+    for (const [d, bytes] of Object.entries(data)) {
+      if (members.has(d)) domainDaily[date] = (domainDaily[date] || 0) + bytes;
+    }
   }
   for (const [date, data] of Object.entries(state.downloadDailyData)) {
-    if (data[domain]) domainDaily[date] = (domainDaily[date] || 0) + data[domain];
+    for (const [d, bytes] of Object.entries(data)) {
+      if (members.has(d)) domainDaily[date] = (domainDaily[date] || 0) + bytes;
+    }
   }
   return state.chartDates.map(d => domainDaily[d] || 0);
 }
@@ -572,13 +595,18 @@ async function showDomainDetail(domain) {
   section.style.display = 'block';
   document.getElementById('detailDomainName').textContent = `域名详情: ${domain}`;
 
-  // 该域名每日流量（浏览+下载合并），只取需要的字段，避免整表复制
+  // 该域名（或分组主站）每日流量：组内全部域名合并
+  const members = getGroupMembers(domain);
   const domainDaily = {};
   for (const [date, data] of Object.entries(state.dailyData)) {
-    if (data[domain]) domainDaily[date] = data[domain];
+    for (const [d, bytes] of Object.entries(data)) {
+      if (members.has(d)) domainDaily[date] = (domainDaily[date] || 0) + bytes;
+    }
   }
   for (const [date, data] of Object.entries(state.downloadDailyData)) {
-    if (data[domain]) domainDaily[date] = (domainDaily[date] || 0) + data[domain];
+    for (const [d, bytes] of Object.entries(data)) {
+      if (members.has(d)) domainDaily[date] = (domainDaily[date] || 0) + bytes;
+    }
   }
 
   let total = 0;
@@ -597,7 +625,6 @@ async function showDomainDetail(domain) {
 
   const browseBytes = state.monthlyData[domain] || 0;
   const dlBytes = state.downloadMonthlyData[domain] || 0;
-
   document.getElementById('detailTotal').textContent = formatBytes(total);
   document.getElementById('detailBreakdown').innerHTML = `
     <span style="color:var(--accent)">浏览 ${formatBytes(browseBytes)}</span>
@@ -609,9 +636,11 @@ async function showDomainDetail(domain) {
   const svg = document.getElementById('detailChart');
   drawChart(svg, getDomainDailyValues(domain), state.chartDates, 'bar', DETAIL_CHART_OPTS);
 
-  const rawData = await loadRawDataForMonth(state.year, state.month);
+  const rawData = await getRawDataForMonth(state.year, state.month);
+  // 细分域名：组内每个域名的子域都展示（分组主站 + 组员及其子域）
+  const memberArr = [...members];
   const subdomains = Object.entries(rawData)
-    .filter(([hostname]) => hostname === domain || hostname.endsWith('.' + domain))
+    .filter(([hostname]) => memberArr.some(m => hostname === m || hostname.endsWith('.' + m)))
     .sort((a, b) => b[1] - a[1]);
   const subList = document.getElementById('subdomainList');
   if (subdomains.length === 0) {
@@ -874,9 +903,10 @@ async function renderExcludedList() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 主题初始化 + 切换按钮（三态：自动 → 浅色 → 深色）
   initTheme();
+  await initDomainGroups(); // 域名分组规则（先于首次 refresh 加载，确保聚合即归组）
   const themeBtn = document.getElementById('themeToggle');
   const syncThemeBtn = () => {
     const eff = currentEffectiveTheme();

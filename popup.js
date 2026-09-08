@@ -100,9 +100,10 @@ async function loadMonth() {
   updateBreakdown(bd.browse, bd.download);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 主题初始化 + 切换按钮（与 dashboard 共用 localStorage 设置）
   initTheme();
+  initDomainGroups(); // 域名分组规则（异步加载，聚合前通常已就绪；未就绪时 resolveGroup 安全降级）
   const themeBtn = document.getElementById('themeToggle');
   const syncThemeBtn = () => {
     const eff = currentEffectiveTheme();
